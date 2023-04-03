@@ -22,7 +22,7 @@ import org.springframework.context.MessageSource;
 class UserApplicationServiceTest {
 
     @Mock
-     MessageSource messageSource;
+    MessageSource messageSource;
 
     @InjectMocks
     UserApplicationService userApplicationService;
