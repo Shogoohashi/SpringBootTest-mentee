@@ -1,10 +1,16 @@
 package com.example.controller;
 
-import com.example.form.SignupForm;
-import static com.example.utils.SampleSignupForm.createSignupForm;
+import java.util.Collections;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,20 +19,13 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Collections;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestBuilders.formLogin;
 import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.authenticated;
+import static org.springframework.security.test.web.servlet.response.SecurityMockMvcResultMatchers.unauthenticated;
+import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
@@ -71,6 +70,25 @@ class LoginControllerTest {
                     .andExpect(redirectedUrl("/user/list"));
 
             verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId)); // 引数がプリミティブの場合はeqメソッドを使って検証が可能(オブジェクトの場合は不可)
+        }
+
+        @Test
+        @DisplayName("異常系: 該当ユーザが存在しない")
+        void case2() throws Exception {
+            String userId = "ohashi";
+            String password = "password";
+            doThrow(new UsernameNotFoundException("user not found")).when(mockUserDetailsService).loadUserByUsername(anyString());
+
+            mockMvc.perform(formLogin()
+                            .loginProcessingUrl("/login")
+                            .user("userId", userId)
+                            .password("password", password)
+                    )
+                    .andExpect(unauthenticated())
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/login?error"));
+
+            verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId));
         }
     }
 }
