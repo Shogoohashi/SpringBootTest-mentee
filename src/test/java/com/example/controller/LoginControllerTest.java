@@ -90,5 +90,24 @@ class LoginControllerTest {
 
             verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId));
         }
+
+        @Test
+        @DisplayName("異常系：パスワードが違う")
+        void case3() throws Exception {
+            String userId = "user@co.jp";
+            String password = "ohashi";
+            doThrow(new UsernameNotFoundException("user not found")).when(mockUserDetailsService).loadUserByUsername(anyString());
+
+            mockMvc.perform(formLogin()
+                            .loginProcessingUrl("/login")
+                            .user("userId", userId)
+                            .password("password", password)
+                    )
+                    .andExpect(unauthenticated())
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/login?error"));
+
+            verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId));
+        }
     }
 }
