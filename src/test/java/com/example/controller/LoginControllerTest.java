@@ -73,7 +73,7 @@ class LoginControllerTest {
         }
 
         @Test
-        @DisplayName("異常系: 該当ユーザが存在しない")
+        @DisplayName("異常系: 該当ユーザが存在しない場合、ログインエラー")
         void case2() throws Exception {
             String userId = "ohashi";
             String password = "password";
@@ -92,7 +92,7 @@ class LoginControllerTest {
         }
 
         @Test
-        @DisplayName("異常系：パスワードが違う")
+        @DisplayName("異常系：パスワードが違う場合、ログインエラー")
         void case3() throws Exception {
             String userId = "user@co.jp";
             String password = "ohashi";
