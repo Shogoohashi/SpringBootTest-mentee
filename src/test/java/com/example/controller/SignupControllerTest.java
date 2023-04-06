@@ -49,9 +49,6 @@ class SignupControllerTest {
     @MockBean
     UserService mockUserService;
 
-    @Mock
-    MessageSource messageSource;
-
     @Autowired
     MockMvc mockMvc;
 
@@ -59,18 +56,18 @@ class SignupControllerTest {
     @DisplayName("正常系:getSignupのリクエストが成功すること。")
     void getSignup() throws Exception {
         Map<String, Integer> genderMap = new HashMap<>();
-        doReturn(genderMap).when(mockUserApplicationService).getGenderMap(any(Locale.class));
+        genderMap.put("male", 1);
+        genderMap.put("female", 2);
+        doReturn(genderMap).when(mockUserApplicationService).getGenderMap(any());
 
-        mockMvc.perform(get("/user/signup")
-                        .with(csrf())
-                )
+        mockMvc.perform(get("/user/signup"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-//                .andExpect(model().attribute(, 5))
+                .andExpect(model().attribute("genderMap", genderMap))
                 .andExpect(view().name("user/signup"));
 
         ArgumentCaptor<MUser> signupArgCaptor1 = ArgumentCaptor.forClass(MUser.class);
-        verify(mockUserService, times(1)).signup(signupArgCaptor1.capture());
+        verify(mockUserApplicationService, times(1)).getGenderMap(any());
     }
 
     @Nested
