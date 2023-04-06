@@ -110,6 +110,7 @@ class SignupControllerTest {
 
         @Test
         @DisplayName("異常系:リクエストが失敗した場合、バリデーションチェックエラーが発生する。")
+        @ExceptionHandler(DataAccessException.class)
         void dataAccessExceptionHandler() throws Exception {
             doThrow(new UsernameNotFoundException("message")).when(mockUserService).signup(any());
 
@@ -128,7 +129,8 @@ class SignupControllerTest {
         }
 
         @Test
-        @ExceptionHandler(DataAccessException.class)
+        @DisplayName("異常系:DataAccessExceptionが発生した場合、エラーメッセージが表示されます。")
+        @ExceptionHandler(Exception.class)
         void exceptionHandler() throws Exception {
             doThrow(new UsernameNotFoundException("message")).when(mockUserService).signup(any());
 
