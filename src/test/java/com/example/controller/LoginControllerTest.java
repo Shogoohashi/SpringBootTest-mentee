@@ -97,13 +97,13 @@ class LoginControllerTest {
         @DisplayName("異常系：パスワードが違う場合、ログインエラー")
         void case3() throws Exception {
             String userId = "user@co.jp";
-            String password = "ohashi";
+            String password = "password";
             doThrow(new UsernameNotFoundException("user not found")).when(mockUserDetailsService).loadUserByUsername(anyString());
 
             mockMvc.perform(formLogin()
                             .loginProcessingUrl("/login")
                             .user("userId", userId)
-                            .password("password", password)
+                            .password("password", "testWord")
                     )
                     .andExpect(unauthenticated())
                     .andExpect(status().isFound())
