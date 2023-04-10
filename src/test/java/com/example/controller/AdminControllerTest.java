@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
@@ -47,11 +48,11 @@ class AdminControllerTest {
         }
 
         @Test
-        @WithMockUser(roles = {""})
         @DisplayName("異常系：ログインしていない場合、失敗する。")
         void getAdmin2() throws Exception {
             mockMvc.perform(get("/admin"))
-                    .andExpect(status().isForbidden());
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("http://localhost/login"));
         }
     }
 }
