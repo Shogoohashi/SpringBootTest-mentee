@@ -98,7 +98,9 @@ class LoginControllerTest {
         void case3() throws Exception {
             String userId = "user@co.jp";
             String password = "password";
-            doThrow(new UsernameNotFoundException("user not found")).when(mockUserDetailsService).loadUserByUsername(anyString());
+            List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+            UserDetails loadUserByUsernameReturnedVal = new User(userId, passwordEncoder.encode(password), authorities);
+            doReturn(loadUserByUsernameReturnedVal).when(mockUserDetailsService).loadUserByUsername(anyString());
 
             mockMvc.perform(formLogin()
                             .loginProcessingUrl("/login")
