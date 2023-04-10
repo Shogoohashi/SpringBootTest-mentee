@@ -51,7 +51,7 @@ class AdminControllerTest {
         @DisplayName("異常系：ログインしていない場合、失敗する。")
         void getAdmin2() throws Exception {
             mockMvc.perform(get("/admin"))
-                    .andExpect(status().is3xxRedirection())
+                    .andExpect(status().isFound())
                     .andExpect(redirectedUrl("http://localhost/login"));
         }
     }
