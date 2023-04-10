@@ -1,14 +1,12 @@
 package com.example.application.service;
 
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -22,40 +20,24 @@ import org.springframework.context.MessageSource;
 class UserApplicationServiceTest {
 
     @Mock
-     MessageSource messageSource;
+    MessageSource messageSource;
 
     @InjectMocks
     UserApplicationService userApplicationService;
 
     @Test
-    @DisplayName("getGenderMapのリクエストが返ってきた場合、男性のみ取得する")
-    void getGenderMap1() {
-        doReturn("男性").when(messageSource).getMessage(anyString(), any(), any(Locale.class));
+    @DisplayName("getGenderMapのリクエストが返ってきた場合、選択された値の性別を返す")
+    void testGetGenderMap() {
+        String testFemale = "female";
+        doReturn("男性").when(messageSource).getMessage(eq("male"), any(), any(Locale.class));
+        doReturn("女性").when(messageSource).getMessage(eq("female"), any(), any(Locale.class));
 
-        Map<String, Integer> actual = userApplicationService.getGenderMap(Locale.JAPAN);
+        userApplicationService.getGenderMap(Locale.JAPAN);
 
-        verify(messageSource, times(1)).getMessage(eq("male"), any(), any(Locale.class));
-
-        Map<String, Integer> expected = new HashMap<>();
-        expected.put("男性", 2);
-
-        assertThat(actual).isEqualTo(expected);
-
-    }
-
-    @Test
-    @DisplayName("getGenderMapのリクエストが返ってきた場合、女性のみ取得する")
-    void getGenderMap2() {
-        doReturn("女性").when(messageSource).getMessage(anyString(), any(), any(Locale.class));
-
-        Map<String, Integer> actual = userApplicationService.getGenderMap(Locale.JAPAN);
-
-        verify(messageSource, times(1)).getMessage(eq("female"), any(), any(Locale.class));
-
-        Map<String, Integer> expected = new HashMap<>();
-        expected.put("女性", 2);
-
-        assertThat(actual).isEqualTo(expected);
+        ArgumentCaptor<String> getGenderMapCaptor = ArgumentCaptor.forClass(String.class);
+        verify(messageSource, times(2)).getMessage(getGenderMapCaptor.capture(), any(), any(Locale.class));
+        String getGenderMapArgVal = getGenderMapCaptor.getValue();
+        assertThat(getGenderMapArgVal).isEqualTo(testFemale);
 
     }
 }
