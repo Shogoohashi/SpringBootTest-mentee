@@ -2,9 +2,11 @@ package com.example.controller;
 
 import java.util.Collections;
 import java.util.List;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -69,7 +71,7 @@ class LoginControllerTest {
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/user/list"));
 
-            verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId)); // 引数がプリミティブの場合はeqメソッドを使って検証が可能(オブジェクトの場合は不可)
+            verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId));
         }
 
         @Test
@@ -107,7 +109,10 @@ class LoginControllerTest {
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/login?error"));
 
-            verify(mockUserDetailsService, times(1)).loadUserByUsername(eq(userId));
+            ArgumentCaptor<String> loadUserByUsernameArgCaptor = ArgumentCaptor.forClass(String.class);
+            verify(mockUserDetailsService, times(1)).loadUserByUsername(loadUserByUsernameArgCaptor.capture());
+            String  loadUserByUsernameArgVal = loadUserByUsernameArgCaptor.getValue();
+            assertThat(loadUserByUsernameArgVal).isEqualTo(userId);
         }
     }
 }
