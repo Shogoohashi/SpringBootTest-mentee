@@ -9,16 +9,12 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -130,7 +126,7 @@ class SignupControllerTest {
                     .andExpect(view().name("user/signup"));
 
             ArgumentCaptor<SignupForm> signupArgCaptor = ArgumentCaptor.forClass(SignupForm.class);
-            verify(mockSignupController,times(1)).getSignup(any(),any(Locale.class), signupArgCaptor.capture());
+            verify(mockSignupController, times(1)).getSignup(any(), any(Locale.class), signupArgCaptor.capture());
             SignupForm signupArgVal1 = signupArgCaptor.getValue();
             assertEquals(signupArgVal1.getUserId(), signupForm.getUserId());
             assertEquals(signupArgVal1.getPassword(), signupForm.getPassword());
@@ -144,7 +140,8 @@ class SignupControllerTest {
         @WithMockUser
         @DisplayName("異常系:DataAccessExceptionが発生した場合、エラーメッセージが表示されます。")
         void testPostSignup2() throws Exception {
-            doThrow(new DataAccessException(""){}).when(mockUserService).signup(any(MUser.class));
+            doThrow(new DataAccessException("") {
+            }).when(mockUserService).signup(any(MUser.class));
             SignupForm signupForm = createSignupForm();
             MUser user = modelMapper.map(signupForm, MUser.class);
 
