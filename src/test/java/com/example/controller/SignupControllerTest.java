@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
-import org.mockito.Mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -25,10 +24,10 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.MessageSource;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.http.HttpStatus;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -37,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @WebMvcTest(SignupController.class)
 @Import(ModelMapper.class)
@@ -46,11 +44,17 @@ class SignupControllerTest {
     @MockBean
     UserApplicationService mockUserApplicationService;
 
+    @SpyBean
+    SignupController mockSignupController;
+
     @MockBean
     UserService mockUserService;
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    ModelMapper modelMapper;
 
     @Test
     @DisplayName("正常系:getSignupのリクエストが成功すること。")
@@ -66,7 +70,6 @@ class SignupControllerTest {
                 .andExpect(model().attribute("genderMap", genderMap))
                 .andExpect(view().name("user/signup"));
 
-        ArgumentCaptor<MUser> signupArgCaptor1 = ArgumentCaptor.forClass(MUser.class);
         verify(mockUserApplicationService, times(1)).getGenderMap(any());
     }
 
@@ -109,43 +112,61 @@ class SignupControllerTest {
         }
 
         @Test
-        @DisplayName("異常系:リクエストが失敗した場合、バリデーションチェックエラーが発生する。")
-        @ExceptionHandler(DataAccessException.class)
-        void dataAccessExceptionHandler() throws Exception {
-            doThrow(new UsernameNotFoundException("message")).when(mockUserService).signup(any());
-
+        @DisplayName("異常系:バリデーションチェックエラー")
+        void testPostSignup1() throws Exception {
             SignupForm signupForm = createSignupForm();
-            mockMvc.perform(post("/user/signup").param("message", "SignupControllerで例外が発生しました")
-                            .with(csrf())
-                            .flashAttr("signupForm", signupForm)
-                    )
-                    .andExpect(model().hasNoErrors())
-                    .andExpect(model().attribute("message", "SignupControllerで例外が発生しました"))
-                    .andExpect(status().isOk())
-                    .andExpect(view().name("error"));
+            signupForm.setUserId("");
 
-            ArgumentCaptor<MUser> signupArgCaptor1 = ArgumentCaptor.forClass(MUser.class);
-            verify(mockUserService, times(1)).signup(signupArgCaptor1.capture());
+            mockMvc.perform(post("/user/signup")
+                            .with(csrf())
+                            .flashAttr("signupForm", signupForm))
+                    .andExpect(status().isOk())
+                    .andExpect(model().hasErrors())
+                    .andExpect(view().name("user/signup"));
+
+            ArgumentCaptor<SignupForm> signupArgCaptor = ArgumentCaptor.forClass(SignupForm.class);
+            verify(mockSignupController,times(1)).getSignup(any(),any(Locale.class), signupArgCaptor.capture());
+            SignupForm signupArgVal1 = signupArgCaptor.getValue();
+            assertEquals(signupArgVal1.getUserId(), signupForm.getUserId());
+            assertEquals(signupArgVal1.getPassword(), signupForm.getPassword());
+            assertEquals(signupArgVal1.getUserName(), signupForm.getUserName());
+            assertEquals(signupArgVal1.getBirthday(), signupForm.getBirthday());
+            assertEquals(signupArgVal1.getAge(), signupForm.getAge());
+            assertEquals(signupArgVal1.getGender(), signupForm.getGender());
         }
 
         @Test
         @DisplayName("異常系:DataAccessExceptionが発生した場合、エラーメッセージが表示されます。")
-        @ExceptionHandler(Exception.class)
-        void exceptionHandler() throws Exception {
-            doThrow(new UsernameNotFoundException("message")).when(mockUserService).signup(any());
-
+        void testPostSignup2() throws Exception {
             SignupForm signupForm = createSignupForm();
+            signupForm.setUserId(null);
+            signupForm.setPassword(null);
+            signupForm.setUserName(null);
+            signupForm.setBirthday(null);
+            signupForm.setAge(null);
+            signupForm.setGender(null);
+
+            doThrow(new DataAccessException("") {
+            }).when(mockSignupController).postSignup(any(),any(),any(),any());
+
             mockMvc.perform(post("/user/signup")
                             .with(csrf())
-                            .flashAttr("signupForm", signupForm)
                     )
-                    .andExpect(model().hasNoErrors())
-                    .andExpect(model().attribute("message", "SignupControllerで例外が発生しました"))
                     .andExpect(status().isOk())
+                    .andExpect(model().attribute("error", ""))
+                    .andExpect(model().attribute("message", "SignupControllerで例外が発生しました"))
+                    .andExpect(model().attribute("status", HttpStatus.INTERNAL_SERVER_ERROR))
                     .andExpect(view().name("error"));
 
-            ArgumentCaptor<MUser> signupArgCaptor1 = ArgumentCaptor.forClass(MUser.class);
-            verify(mockUserService, times(1)).signup(signupArgCaptor1.capture());
+            ArgumentCaptor<SignupForm> signupArgCaptor = ArgumentCaptor.forClass(SignupForm.class);
+            verify(mockSignupController, times(1)).postSignup(any(),any(),signupArgCaptor.capture(),any());
+            SignupForm signupArgVal1 = signupArgCaptor.getValue();
+            assertEquals(signupArgVal1.getUserId(), signupForm.getUserId());
+            assertEquals(signupArgVal1.getPassword(), signupForm.getPassword());
+            assertEquals(signupArgVal1.getUserName(), signupForm.getUserName());
+            assertEquals(signupArgVal1.getBirthday(), signupForm.getBirthday());
+            assertEquals(signupArgVal1.getAge(), signupForm.getAge());
+            assertEquals(signupArgVal1.getGender(), signupForm.getGender());
         }
     }
 }
