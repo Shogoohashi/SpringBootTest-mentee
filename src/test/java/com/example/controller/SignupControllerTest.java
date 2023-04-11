@@ -9,12 +9,16 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -28,6 +32,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -136,21 +141,16 @@ class SignupControllerTest {
         }
 
         @Test
+        @WithMockUser
         @DisplayName("異常系:DataAccessExceptionが発生した場合、エラーメッセージが表示されます。")
         void testPostSignup2() throws Exception {
+            doThrow(new DataAccessException(""){}).when(mockUserService).signup(any(MUser.class));
             SignupForm signupForm = createSignupForm();
-            signupForm.setUserId(null);
-            signupForm.setPassword(null);
-            signupForm.setUserName(null);
-            signupForm.setBirthday(null);
-            signupForm.setAge(null);
-            signupForm.setGender(null);
-
-            doThrow(new DataAccessException("") {
-            }).when(mockSignupController).postSignup(any(),any(),any(),any());
+            MUser user = modelMapper.map(signupForm, MUser.class);
 
             mockMvc.perform(post("/user/signup")
                             .with(csrf())
+                            .flashAttr("signupForm", signupForm)
                     )
                     .andExpect(status().isOk())
                     .andExpect(model().attribute("error", ""))
@@ -158,15 +158,15 @@ class SignupControllerTest {
                     .andExpect(model().attribute("status", HttpStatus.INTERNAL_SERVER_ERROR))
                     .andExpect(view().name("error"));
 
-            ArgumentCaptor<SignupForm> signupArgCaptor = ArgumentCaptor.forClass(SignupForm.class);
-            verify(mockSignupController, times(1)).postSignup(any(),any(),signupArgCaptor.capture(),any());
-            SignupForm signupArgVal1 = signupArgCaptor.getValue();
-            assertEquals(signupArgVal1.getUserId(), signupForm.getUserId());
-            assertEquals(signupArgVal1.getPassword(), signupForm.getPassword());
-            assertEquals(signupArgVal1.getUserName(), signupForm.getUserName());
-            assertEquals(signupArgVal1.getBirthday(), signupForm.getBirthday());
-            assertEquals(signupArgVal1.getAge(), signupForm.getAge());
-            assertEquals(signupArgVal1.getGender(), signupForm.getGender());
+            ArgumentCaptor<MUser> signupArgCaptor = ArgumentCaptor.forClass(MUser.class);
+            verify(mockUserService, times(1)).signup(signupArgCaptor.capture());
+            MUser signupArgVal1 = signupArgCaptor.getValue();
+            assertEquals(signupArgVal1.getUserId(), user.getUserId());
+            assertEquals(signupArgVal1.getPassword(), user.getPassword());
+            assertEquals(signupArgVal1.getUserName(), user.getUserName());
+            assertEquals(signupArgVal1.getBirthday(), user.getBirthday());
+            assertEquals(signupArgVal1.getAge(), user.getAge());
+            assertEquals(signupArgVal1.getGender(), user.getGender());
         }
     }
 }
