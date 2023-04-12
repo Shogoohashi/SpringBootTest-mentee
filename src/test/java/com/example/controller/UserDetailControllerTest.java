@@ -25,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -167,8 +168,9 @@ class UserDetailControllerTest {
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
-                                .with(csrf()))
-                        .andExpect(status().is3xxRedirection())
+                                .with(csrf())
+                                .flashAttr("signupForm", userDetailForm))
+                        .andExpect(status().isFound())
                         .andExpect(redirectedUrl("/user/list"));
 
                 ArgumentCaptor<String> deleteArgCaptor = ArgumentCaptor.forClass(String.class);
@@ -182,12 +184,10 @@ class UserDetailControllerTest {
             @Test
             @DisplayName("異常系：ログインしていない場合、login画面へ遷移する")
             void TestDeleteUser1() throws Exception {
-                doNothing().when(mockUserService).deleteUserOne(any());
-
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
                                 .with(csrf()))
-                        .andExpect(status().is3xxRedirection())
+                        .andExpect(status().isFound())
                         .andExpect(redirectedUrl("http://localhost/login"));
 
                 verify(mockUserService, times(0)).deleteUserOne(any());
@@ -203,7 +203,8 @@ class UserDetailControllerTest {
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
-                                .with(csrf()))
+                                .with(csrf())
+                                .flashAttr("signupForm", userDetailForm))
                         .andExpect(status().isOk())
                         .andExpect(model().attribute("error", ""))
                         .andExpect(model().attribute("message", "DataAccessExceptionが発生しました"))
