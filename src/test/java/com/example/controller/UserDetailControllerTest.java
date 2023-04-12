@@ -55,7 +55,7 @@ class UserDetailControllerTest {
 
 
     @Nested
-    class getUser {
+    class GetUser {
 
         @Test
         @WithMockUser
@@ -119,7 +119,7 @@ class UserDetailControllerTest {
 
 
         @Nested
-        class updateUser {
+        class UpdateUser {
 
             @Test
             @WithMockUser
@@ -160,7 +160,7 @@ class UserDetailControllerTest {
         }
 
         @Nested
-        class deleteUser {
+        class DeleteUser {
 
             @Test
             @WithMockUser
