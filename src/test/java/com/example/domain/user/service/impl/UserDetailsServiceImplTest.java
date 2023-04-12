@@ -16,6 +16,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,22 +26,23 @@ class UserDetailsServiceImplTest {
     UserService mockUserService;
 
     @InjectMocks
-    UserDetailsServiceImpl UserDetailsServiceImpl;
+    UserDetailsServiceImpl userDetailsServiceImpl;
 
     @Test
     @DisplayName("該当ユーザが存在した場合、該当するユーザを取得する")
     void testLoadUserByUsername() {
-        MUser testLoginUser = createGeneralUserA();
-        doReturn(testLoginUser).when(mockUserService).getLoginUser(any());
+        MUser LoginUserReturnVal = createGeneralUserA();
+        doReturn(LoginUserReturnVal).when(mockUserService).getLoginUser(any());
 
-        String mUser = "ユーザー１";
-        MUser actual = mockUserService.getLoginUser(mUser);
+        MUser mUser = createGeneralUserA();
+        UserDetails actual = userDetailsServiceImpl.loadUserByUsername("ユーザー1");
 
-        assertThat(actual.getUserName()).isEqualTo(testLoginUser.getUserName());
+        assertThat(actual.getUsername()).isEqualTo(LoginUserReturnVal.getUserId());
 
-        ArgumentCaptor<String> loginUserArgCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mockUserService, times(1)).getLoginUser(loginUserArgCaptor.capture());
-        assertThat(loginUserArgCaptor.getValue()).isEqualTo(mUser);
+        ArgumentCaptor<String> getLoginUserArgumentCaptor  = ArgumentCaptor.forClass(String.class);
+        verify(mockUserService, times(1)).getLoginUser(getLoginUserArgumentCaptor.capture());
+        String getLoginUserArgVal = getLoginUserArgumentCaptor.getValue();
+        assertThat(getLoginUserArgVal).isEqualTo(mUser.getUserName());
 
     }
 
@@ -50,12 +52,12 @@ class UserDetailsServiceImplTest {
         doReturn(null).when(mockUserService).getLoginUser(any());
 
         UsernameNotFoundException e = assertThrows(UsernameNotFoundException.class, () ->
-                UserDetailsServiceImpl.loadUserByUsername(null));
-        assertThat(e.getMessage().equals("user not found"));
+                userDetailsServiceImpl.loadUserByUsername(null));
+        assertThat(e.getMessage()).isEqualTo("user not found");
 
-        ArgumentCaptor<String> UsernameNotFoundExceptionArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mockUserService, times(1)).getLoginUser(UsernameNotFoundExceptionArgumentCaptor.capture());
-        assertThat(UsernameNotFoundExceptionArgumentCaptor.getValue()).isEqualTo(null);
+        ArgumentCaptor<String> getLoginUserArgumentCaptor = ArgumentCaptor.forClass(String.class);
+        verify(mockUserService, times(1)).getLoginUser(getLoginUserArgumentCaptor.capture());
+        assertThat(getLoginUserArgumentCaptor.getValue()).isEqualTo(null);
 
     }
 }
