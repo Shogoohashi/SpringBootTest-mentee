@@ -122,29 +122,33 @@ class UserDetailControllerTest {
 
                 mockMvc.perform(post("/user/detail")
                                 .param("update", "")
-                                .with(csrf()))
-                        .andExpect(status().is3xxRedirection())
+                                .with(csrf())
+                                .flashAttr("signupForm", userDetailForm))
+                        .andExpect(status().isFound())
                         .andExpect(redirectedUrl("/user/list")
                         );
-                ArgumentCaptor<String> deleteArgCaptor = ArgumentCaptor.forClass(String.class);
-                verify(mockUserService, times(1))
-                        .updateUserOne(deleteArgCaptor.capture(), deleteArgCaptor.capture(), deleteArgCaptor.capture());
-                String updateArgVal = deleteArgCaptor.getValue();
-                assertThat(updateArgVal).isEqualTo(userDetailForm.getUserId());
-                assertThat(updateArgVal).isEqualTo(userDetailForm.getUserName());
-                assertThat(updateArgVal).isEqualTo(userDetailForm.getPassword());
+                ArgumentCaptor<String> updateArgCaptor1 = ArgumentCaptor.forClass(String.class);
+                ArgumentCaptor<String> updateArgCaptor2 = ArgumentCaptor.forClass(String.class);
+                ArgumentCaptor<String> updateArgCaptor3 = ArgumentCaptor.forClass(String.class);
+                verify(mockUserService, times(1)).updateUserOne(updateArgCaptor1.capture(), any(), any());
+                verify(mockUserService, times(1)).updateUserOne(any(), updateArgCaptor2.capture(), any());
+                verify(mockUserService, times(1)).updateUserOne(any(), any(), updateArgCaptor3.capture());
+                String updateArgVal1 = updateArgCaptor1.getValue();
+                String updateArgVal2 = updateArgCaptor2.getValue();
+                String updateArgVal3 = updateArgCaptor3.getValue();
+                assertThat(updateArgVal1).isEqualTo(userDetailForm.getUserId());
+                assertThat(updateArgVal2).isEqualTo(userDetailForm.getUserName());
+                assertThat(updateArgVal3).isEqualTo(userDetailForm.getPassword());
 
             }
 
             @Test
             @DisplayName("異常系：ログインをしていない場合、ログイン画面へ戻る")
             void testUpdateUser1() throws Exception {
-                doNothing().when(mockUserService).updateUserOne(any(), any(), any());
-
                 mockMvc.perform(post("/user/detail")
                                 .param("update", "")
                                 .with(csrf()))
-                        .andExpect(status().is3xxRedirection())
+                        .andExpect(status().isFound())
                         .andExpect(redirectedUrl("http://localhost/login"));
 
                 verify(mockUserService, times(0)).updateUserOne(any(), any(), any());
