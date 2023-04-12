@@ -81,13 +81,9 @@ class UserDetailControllerTest {
         void testGetUser1() throws Exception {
             MUser mUser = createGeneralUserA();
             mUser.setPassword(null);
-            doReturn(mUser).when(mockUserService).getUserOne(any());
-            UserDetailForm userDetailForm;
-            userDetailForm = modelMapper.map(mUser, UserDetailForm.class);
-            userDetailForm.setSalaryList(mUser.getSalaryList());
 
-            mockMvc.perform(get("/user/detail", ""))
-                    .andExpect(status().is3xxRedirection())
+            mockMvc.perform(get("/user/detail{userId}", "user@co.jp"))
+                    .andExpect(status().isFound())
                     .andExpect(redirectedUrlTemplate("http://localhost/login"));
 
             verify(mockUserService, times(0)).getUserOne(any());
