@@ -36,9 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@Transactional
+@WebMvcTest
 class UserDetailControllerTest {
 
     @Autowired
@@ -59,7 +57,6 @@ class UserDetailControllerTest {
 
         @Test
         @WithMockUser
-        @Sql("classpath:testData/data.sql")
         @DisplayName("正常系: ログインした状態だと詳細画面が表示される")
         void testGetUser() throws Exception {
             MUser mUser = createGeneralUserA();
