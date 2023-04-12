@@ -28,7 +28,6 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -137,7 +136,6 @@ class SignupControllerTest {
         }
 
         @Test
-        @WithMockUser
         @DisplayName("異常系:DataAccessExceptionが発生した場合、エラーメッセージが表示されます。")
         void testPostSignup2() throws Exception {
             doThrow(new DataAccessException("") {
