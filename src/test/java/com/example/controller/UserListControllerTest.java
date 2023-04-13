@@ -24,6 +24,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -46,7 +47,7 @@ class UserListControllerTest {
     MockMvc mockMvc;
 
     @Nested
-    class getUser {
+    class GetUser {
 
         @Test
         @WithMockUser
@@ -58,7 +59,8 @@ class UserListControllerTest {
             UserListForm userListForm;
             userListForm = modelMapper.map(mUserList, UserListForm.class);
 
-            mockMvc.perform(get("/user/list"))
+            mockMvc.perform(get("/user/list")
+                            .flashAttr("userListForm", userListForm))
                     .andExpect(status().isOk())
                     .andExpect(model().attribute("userList", mUserList))
                     .andExpect(view().name("user/list"));
@@ -78,7 +80,7 @@ class UserListControllerTest {
             doReturn(mUserList).when(mockUserService).getUsers(any());
 
             mockMvc.perform(get("/user/list"))
-                    .andExpect(status().is3xxRedirection())
+                    .andExpect(status().isFound())
                     .andExpect(redirectedUrl("http://localhost/login"));
 
             verify(mockUserService, times(1)).getUsers(any());
@@ -144,7 +146,7 @@ class UserListControllerTest {
 
             mockMvc.perform(post("/user/list")
                             .with(csrf()))
-                    .andExpect(status().is3xxRedirection())
+                    .andExpect(status().isFound())
                     .andExpect(redirectedUrl("http://localhost/login"));
 
             verify(mockUserService, times(1)).getUsers(any());
