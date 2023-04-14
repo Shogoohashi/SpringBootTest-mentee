@@ -4,7 +4,10 @@ import com.example.domain.user.model.MUser;
 import com.example.domain.user.service.UserService;
 import com.example.form.UserListForm;
 import static com.example.utils.SampleMUser.createGeneralUserA;
+import static com.example.utils.SampleMUser.createGeneralUserB;
+import java.util.Arrays;
 import java.util.List;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -24,7 +27,6 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -53,37 +55,34 @@ class UserListControllerTest {
         @WithMockUser
         @DisplayName("正常系：ログイン状態だとユーザ一覧画面を表示される。")
         void testGetUserList() throws Exception {
-            MUser mUser = createGeneralUserA();
-            List<MUser> mUserList = mockUserService.getUsers(mUser);
+            MUser mUserA = createGeneralUserA();
+            MUser mUserB = createGeneralUserB();
+            List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
             doReturn(mUserList).when(mockUserService).getUsers(any());
             UserListForm userListForm;
             userListForm = modelMapper.map(mUserList, UserListForm.class);
 
             mockMvc.perform(get("/user/list")
-                            .flashAttr("userListForm", userListForm))
+                            .flashAttr("userList", userListForm))
                     .andExpect(status().isOk())
                     .andExpect(model().attribute("userList", mUserList))
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
-            verify(mockUserService, times(2)).getUsers(userListArgumentCaptor.capture());
+            verify(mockUserService, times(1)).getUsers(userListArgumentCaptor.capture());
             MUser userListArgVal = userListArgumentCaptor.getValue();
-            assertEquals(userListArgVal.getUserId(), userListForm.getUserId());
-            assertEquals(userListArgVal.getUserName(), userListForm.getUserName());
+            assertThat(userListArgVal.getUserId()).isEqualTo(userListForm.getUserId());
+            assertThat(userListArgVal.getUserName()).isEqualTo(userListForm.getUserName());
         }
 
         @Test
         @DisplayName("異常系：ログインをしていない場合、ログイン画面へ戻る")
         void testGetUserList1() throws Exception {
-            MUser mUser = createGeneralUserA();
-            List<MUser> mUserList = mockUserService.getUsers(mUser);
-            doReturn(mUserList).when(mockUserService).getUsers(any());
-
             mockMvc.perform(get("/user/list"))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("http://localhost/login"));
 
-            verify(mockUserService, times(1)).getUsers(any());
+            verify(mockUserService, times(0)).getUsers(any());
 
         }
 
@@ -94,6 +93,8 @@ class UserListControllerTest {
             doThrow(new DataAccessException("userList") {
             }).when(mockUserService).getUsers(any());
             UserListForm userListForm = new UserListForm();
+            userListForm.setUserId(null);
+            userListForm.setUserName(null);
 
             mockMvc.perform(get("/user/list"))
                     .andExpect(status().isOk())
