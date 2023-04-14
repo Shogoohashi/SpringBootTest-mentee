@@ -112,15 +112,16 @@ class UserListControllerTest {
     }
 
     @Nested
-    class postUserList {
+    class PostUserList {
 
 
         @Test
         @WithMockUser
         @DisplayName("正常系：ログイン状態でユーザ画面へ遷移した場合、ユーザ検索処理がされる。")
         void testPostUserList() throws Exception {
-            MUser mUser = createGeneralUserA();
-            List<MUser> mUserList = mockUserService.getUsers(mUser);
+            MUser mUserA = createGeneralUserA();
+            MUser mUserB = createGeneralUserB();
+            List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
             doReturn(mUserList).when(mockUserService).getUsers(any());
             UserListForm userListForm;
             userListForm = modelMapper.map(mUserList, UserListForm.class);
@@ -132,7 +133,7 @@ class UserListControllerTest {
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
-            verify(mockUserService, times(2)).getUsers(userListArgumentCaptor.capture());
+            verify(mockUserService, times(1)).getUsers(userListArgumentCaptor.capture());
             MUser userListArgVal = userListArgumentCaptor.getValue();
             assertEquals(userListArgVal.getUserId(), userListForm.getUserId());
             assertEquals(userListArgVal.getUserName(), userListForm.getUserName());
@@ -141,16 +142,12 @@ class UserListControllerTest {
         @Test
         @DisplayName("異常系：ログインをしていない場合、ログイン画面へ戻る")
         void testPostUserList1() throws Exception {
-            MUser mUser = createGeneralUserA();
-            List<MUser> mUserList = mockUserService.getUsers(mUser);
-            doReturn(mUserList).when(mockUserService).getUsers(any());
-
             mockMvc.perform(post("/user/list")
                             .with(csrf()))
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("http://localhost/login"));
 
-            verify(mockUserService, times(1)).getUsers(any());
+            verify(mockUserService, times(0)).getUsers(any());
 
         }
 
@@ -161,6 +158,8 @@ class UserListControllerTest {
             doThrow(new DataAccessException("userList") {
             }).when(mockUserService).getUsers(any());
             UserListForm userListForm = new UserListForm();
+            userListForm.setUserId(null);
+            userListForm.setUserName(null);
 
             mockMvc.perform(post("/user/list")
                             .with(csrf()))
