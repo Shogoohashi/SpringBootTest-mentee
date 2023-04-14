@@ -55,24 +55,26 @@ class UserListControllerTest {
         @WithMockUser
         @DisplayName("正常系：ログイン状態だとユーザ一覧画面を表示される。")
         void testGetUserList() throws Exception {
+            MUser test = new MUser();
+            test.setUserId(null);
+            test.setUserName(null);
+
             MUser mUserA = createGeneralUserA();
             MUser mUserB = createGeneralUserB();
-            List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
-            doReturn(mUserList).when(mockUserService).getUsers(any());
-            UserListForm userListForm;
-            userListForm = modelMapper.map(mUserList, UserListForm.class);
+            List<MUser> userListForm = Arrays.asList(mUserA, mUserB);
+            doReturn(userListForm).when(mockUserService).getUsers(any());
 
             mockMvc.perform(get("/user/list")
-                            .flashAttr("userListForm", userListForm))
+                            .flashAttr("userList", userListForm))
                     .andExpect(status().isOk())
-                    .andExpect(model().attribute("userListForm", userListForm))
+                    .andExpect(model().attribute("userList", userListForm))
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).getUsers(userListArgumentCaptor.capture());
             MUser userListArgVal = userListArgumentCaptor.getValue();
-            assertThat(userListArgVal.getUserId()).isEqualTo(userListForm.getUserId());
-            assertThat(userListArgVal.getUserName()).isEqualTo(userListForm.getUserName());
+            assertThat(userListArgVal.getUserId()).isEqualTo(test.getUserId());
+            assertThat(userListArgVal.getUserName()).isEqualTo(test.getUserName());
         }
 
         @Test
