@@ -4,6 +4,7 @@ import com.example.domain.user.model.MUser;
 import com.example.domain.user.service.UserService;
 import com.example.form.UserDetailForm;
 import static com.example.utils.SampleMUser.createGeneralUserA;
+import static com.example.utils.SampleUserDetailForm.createUserDetailForm;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -70,9 +71,9 @@ class UserDetailControllerTest {
                     .andExpect(model().attribute("userDetailForm", userDetailForm))
                     .andExpect(view().name("user/detail"));
 
-            ArgumentCaptor<String> userDetailFormArgumentCaptor = ArgumentCaptor.forClass(String.class);
-            verify(mockUserService, times(1)).getUserOne(userDetailFormArgumentCaptor.capture());
-            String userDetailFormArgVal = userDetailFormArgumentCaptor.getValue();
+            ArgumentCaptor<String> getUserOneArgCaptor = ArgumentCaptor.forClass(String.class);
+            verify(mockUserService, times(1)).getUserOne(getUserOneArgCaptor.capture());
+            String userDetailFormArgVal = getUserOneArgCaptor.getValue();
             assertThat(userDetailFormArgVal).isEqualTo("user@co.jp");
         }
 
@@ -103,9 +104,9 @@ class UserDetailControllerTest {
                     .andExpect(model().attribute("status", HttpStatus.INTERNAL_SERVER_ERROR))
                     .andExpect(view().name("error"));
 
-            ArgumentCaptor<String> signupArgCaptor1 = ArgumentCaptor.forClass(String.class);
-            verify(mockUserService, times(1)).getUserOne(signupArgCaptor1.capture());
-            String userDetailFormArgVal = signupArgCaptor1.getValue();
+            ArgumentCaptor<String> getUserOneArgCaptor = ArgumentCaptor.forClass(String.class);
+            verify(mockUserService, times(1)).getUserOne(getUserOneArgCaptor.capture());
+            String userDetailFormArgVal = getUserOneArgCaptor.getValue();
             assertThat(userDetailFormArgVal).isEqualTo("user@co.jp");
         }
 
@@ -133,9 +134,8 @@ class UserDetailControllerTest {
                 ArgumentCaptor<String> updateArgCaptor1 = ArgumentCaptor.forClass(String.class);
                 ArgumentCaptor<String> updateArgCaptor2 = ArgumentCaptor.forClass(String.class);
                 ArgumentCaptor<String> updateArgCaptor3 = ArgumentCaptor.forClass(String.class);
-                verify(mockUserService, times(1)).updateUserOne(updateArgCaptor1.capture(), any(), any());
-                verify(mockUserService, times(1)).updateUserOne(any(), updateArgCaptor2.capture(), any());
-                verify(mockUserService, times(1)).updateUserOne(any(), any(), updateArgCaptor3.capture());
+                verify(mockUserService, times(1))
+                        .updateUserOne(updateArgCaptor1.capture(), updateArgCaptor2.capture(), updateArgCaptor3.capture());
                 String updateArgVal1 = updateArgCaptor1.getValue();
                 String updateArgVal2 = updateArgCaptor2.getValue();
                 String updateArgVal3 = updateArgCaptor3.getValue();
