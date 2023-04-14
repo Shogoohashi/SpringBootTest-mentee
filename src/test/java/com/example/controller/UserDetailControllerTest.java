@@ -127,7 +127,7 @@ class UserDetailControllerTest {
                 mockMvc.perform(post("/user/detail")
                                 .param("update", "")
                                 .with(csrf())
-                                .flashAttr("signupForm", userDetailForm))
+                                .flashAttr("userDetailForm", userDetailForm))
                         .andExpect(status().isFound())
                         .andExpect(redirectedUrl("/user/list")
                         );
@@ -208,7 +208,7 @@ class UserDetailControllerTest {
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
                                 .with(csrf())
-                                .flashAttr("signupForm", userDetailForm))
+                                .flashAttr("userDetailForm", userDetailForm))
                         .andExpect(status().isOk())
                         .andExpect(model().attribute("error", ""))
                         .andExpect(model().attribute("message", "DataAccessExceptionが発生しました"))
