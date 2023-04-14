@@ -63,9 +63,9 @@ class UserListControllerTest {
             userListForm = modelMapper.map(mUserList, UserListForm.class);
 
             mockMvc.perform(get("/user/list")
-                            .flashAttr("userList", userListForm))
+                            .flashAttr("userListForm", userListForm))
                     .andExpect(status().isOk())
-                    .andExpect(model().attribute("userList", mUserList))
+                    .andExpect(model().attribute("userListForm", userListForm))
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
@@ -129,7 +129,7 @@ class UserListControllerTest {
             mockMvc.perform(post("/user/list")
                             .with(csrf()))
                     .andExpect(status().isOk())
-                    .andExpect(model().attribute("userList", mUserList))
+                    .andExpect(model().attribute("userListForm", userListForm))
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
