@@ -119,6 +119,9 @@ class UserDetailControllerTest {
             void testUpdateUser() throws Exception {
                 doNothing().when(mockUserService).updateUserOne(any(), any(), any());
                 UserDetailForm userDetailForm = new UserDetailForm();
+                userDetailForm.setUserId(null);
+                userDetailForm.setUserName(null);
+                userDetailForm.setUserName(null);
 
                 mockMvc.perform(post("/user/detail")
                                 .param("update", "")
@@ -164,6 +167,7 @@ class UserDetailControllerTest {
             void TestDeleteUser() throws Exception {
                 doNothing().when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = new UserDetailForm();
+                userDetailForm.setUserId(null);
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
@@ -198,7 +202,8 @@ class UserDetailControllerTest {
             void TestDeleteUser2() throws Exception {
                 doThrow(new DataAccessException("userDetailForm") {
                 }).when(mockUserService).deleteUserOne(any());
-                UserDetailForm userDetailForm = new UserDetailForm();
+                UserDetailForm userDetailForm = createUserDetailForm();
+                userDetailForm.setUserId(null);
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
