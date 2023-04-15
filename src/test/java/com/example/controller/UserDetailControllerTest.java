@@ -118,11 +118,14 @@ class UserDetailControllerTest {
             @WithMockUser
             @DisplayName("正常系：ログイン成功後、ユーザー更新処理後にユーザ画面へ遷移する。")
             void testUpdateUser() throws Exception {
+                String testUserId = "test@co.jp";
+                String testUserName = "テストユーザ";
+                String testPassword = "testPassword";
                 doNothing().when(mockUserService).updateUserOne(any(), any(), any());
                 UserDetailForm userDetailForm = new UserDetailForm();
-                userDetailForm.setUserId(null);
-                userDetailForm.setUserName(null);
-                userDetailForm.setUserName(null);
+                userDetailForm.setUserId(testUserId);
+                userDetailForm.setPassword(testPassword);
+                userDetailForm.setUserName(testUserName);
 
                 mockMvc.perform(post("/user/detail")
                                 .param("update", "")
@@ -139,9 +142,9 @@ class UserDetailControllerTest {
                 String updateArgVal1 = updateArgCaptor1.getValue();
                 String updateArgVal2 = updateArgCaptor2.getValue();
                 String updateArgVal3 = updateArgCaptor3.getValue();
-                assertThat(updateArgVal1).isEqualTo(userDetailForm.getUserId());
-                assertThat(updateArgVal2).isEqualTo(userDetailForm.getUserName());
-                assertThat(updateArgVal3).isEqualTo(userDetailForm.getPassword());
+                assertThat(updateArgVal1).isEqualTo(testUserId);
+                assertThat(updateArgVal2).isEqualTo(testPassword);
+                assertThat(updateArgVal3).isEqualTo(testUserName);
 
             }
 
@@ -165,14 +168,15 @@ class UserDetailControllerTest {
             @WithMockUser
             @DisplayName("正常系：ユーザ削除処理をした場合、ユーザリスト画面へ遷移する")
             void TestDeleteUser() throws Exception {
+                String testUserId = "test@co.jp";
                 doNothing().when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = new UserDetailForm();
-                userDetailForm.setUserId(null);
+                userDetailForm.setUserId(testUserId);
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
                                 .with(csrf())
-                                .flashAttr("signupForm", userDetailForm))
+                                .flashAttr("UserDetailForm", userDetailForm))
                         .andExpect(status().isFound())
                         .andExpect(redirectedUrl("/user/list"));
 
@@ -180,7 +184,7 @@ class UserDetailControllerTest {
                 verify(mockUserService, times(1))
                         .deleteUserOne(deleteArgCaptor.capture());
                 String deleteArgVal = deleteArgCaptor.getValue();
-                assertThat(deleteArgVal).isEqualTo(userDetailForm.getUserId());
+                assertThat(deleteArgVal).isNull();
 
             }
 
@@ -200,10 +204,11 @@ class UserDetailControllerTest {
             @WithMockUser
             @DisplayName("異常系：DataAccessExceptionが発生した場合、error画面へ遷移する")
             void TestDeleteUser2() throws Exception {
+                String testUserId = "test@co.jp";
                 doThrow(new DataAccessException("userDetailForm") {
                 }).when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = createUserDetailForm();
-                userDetailForm.setUserId(null);
+                userDetailForm.setUserId(testUserId);
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
@@ -220,7 +225,7 @@ class UserDetailControllerTest {
                 verify(mockUserService, times(1))
                         .deleteUserOne(deleteArgCaptor.capture());
                 String deleteArgVal = deleteArgCaptor.getValue();
-                assertThat(deleteArgVal).isEqualTo(userDetailForm.getUserId());
+                assertThat(deleteArgVal).isEqualTo(testUserId);
 
             }
         }
