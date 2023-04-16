@@ -93,6 +93,22 @@ class SignupFormTest {
         }
 
         @Test
+        @DisplayName("準正常系：passwordの桁数が最大より大きかった場合、エラーが存在すること")
+        void testPasswordMax() {
+            SignupForm signupForm = createSignupForm();
+            signupForm.setPassword("111111111122222222223333333333444444444455555555556666666666" +
+                    "777777777788888888889999999999AAAAAAAAAAB");
+
+            Set<ConstraintViolation<SignupForm>> result = validator.validate(signupForm, ValidGroup2.class);
+
+            List<String> actual = result.stream()
+                    .map(v -> v.getPropertyPath().toString())
+                    .collect(Collectors.toList());
+
+            assertThat(actual).containsOnly("password");
+        }
+
+        @Test
         @DisplayName("準正常系：passwordの桁数が最小より小さかった場合、エラーが存在すること")
         void testPasswordMin() {
             SignupForm signupForm = createSignupForm();
