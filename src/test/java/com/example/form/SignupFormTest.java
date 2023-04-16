@@ -32,7 +32,7 @@ class SignupFormTest {
             SignupForm signupForm = createSignupForm();
 
             Set<ConstraintViolation<SignupForm>> result =
-                    validator.validate(signupForm, GroupOrder.class, ValidGroup1.class, ValidGroup2.class);
+                    validator.validate(signupForm);
 
             List<String> actual = result.stream()
                     .map(v -> v.getPropertyPath().toString())
