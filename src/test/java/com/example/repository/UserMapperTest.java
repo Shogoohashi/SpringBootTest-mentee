@@ -127,7 +127,7 @@ class UserMapperTest {
 
     @Test
     @Sql("classpath:testData/data.sql")
-    @DisplayName("正常系: useIdに紐づくm_userレコードを削除する。")
+    @DisplayName("正常系: useIdに紐づくloginユーザー情報を取得する。")
     void testFindLoginUser() {
         MUser signupForm = createGeneralUserA();
         signupForm.setDepartment(null);
