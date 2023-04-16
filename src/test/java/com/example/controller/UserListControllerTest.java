@@ -59,15 +59,18 @@ class UserListControllerTest {
             test.setUserId(null);
             test.setUserName(null);
 
-            MUser mUserA = createGeneralUserA();
-            MUser mUserB = createGeneralUserB();
-            List<MUser> userListForm = Arrays.asList(mUserA, mUserB);
-            doReturn(userListForm).when(mockUserService).getUsers(any());
+            MUser mUser1 = createGeneralUserA();
+            MUser mUser2 = createGeneralUserB();
+            List<MUser> mUserList = Arrays.asList(mUser1, mUser2);
+            doReturn(mUserList).when(mockUserService).getUsers(any());
+            UserListForm userListForm = new UserListForm();
+            userListForm.setUserId(mUser1.getUserId());
+            userListForm.setUserName(mUser1.getUserName());
 
             mockMvc.perform(get("/user/list")
-                            .flashAttr("userList", userListForm))
+                            .flashAttr("UserListForm", userListForm))
                     .andExpect(status().isOk())
-                    .andExpect(model().attribute("userList", userListForm))
+                    .andExpect(model().attribute("userList", mUserList))
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
@@ -116,29 +119,34 @@ class UserListControllerTest {
     @Nested
     class PostUserList {
 
-
         @Test
         @WithMockUser
         @DisplayName("正常系：ログイン状態でユーザ画面へ遷移した場合、ユーザ検索処理がされる。")
         void testPostUserList() throws Exception {
+            MUser test = new MUser();
+            test.setUserId(null);
+            test.setUserName(null);
+
             MUser mUserA = createGeneralUserA();
             MUser mUserB = createGeneralUserB();
             List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
             doReturn(mUserList).when(mockUserService).getUsers(any());
-            UserListForm userListForm;
-            userListForm = modelMapper.map(mUserList, UserListForm.class);
+            UserListForm userListForm = new UserListForm();
+            userListForm.setUserId(mUserA.getUserId());
+            userListForm.setUserName(mUserA.getUserName());
 
             mockMvc.perform(post("/user/list")
-                            .with(csrf()))
+                            .with(csrf())
+                            .flashAttr("UserListForm", userListForm))
                     .andExpect(status().isOk())
-                    .andExpect(model().attribute("userListForm", userListForm))
+                    .andExpect(model().attribute("userList", mUserList))
                     .andExpect(view().name("user/list"));
 
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).getUsers(userListArgumentCaptor.capture());
             MUser userListArgVal = userListArgumentCaptor.getValue();
-            assertEquals(userListArgVal.getUserId(), userListForm.getUserId());
-            assertEquals(userListArgVal.getUserName(), userListForm.getUserName());
+            assertEquals(userListArgVal.getUserId(), test.getUserId());
+            assertEquals(userListArgVal.getUserName(), test.getUserName());
         }
 
         @Test
