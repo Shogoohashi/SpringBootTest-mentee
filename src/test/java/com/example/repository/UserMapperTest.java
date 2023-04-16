@@ -8,6 +8,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import static org.mockito.Mockito.doReturn;
 import org.modelmapper.ModelMapper;
 import org.mybatis.spring.boot.test.autoconfigure.MybatisTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +28,11 @@ class UserMapperTest {
     @Test
     @DisplayName("正常系：新規登録情報が登録されること")
     void testInsertOne() {
-        SignupForm signupForm = createSignupForm();
-        MUser expected = modelMapper.map(signupForm, MUser.class);
-        expected.setDepartmentId(1);
-        expected.setRole("ROLE_GENERAL");
+        MUser insertOneVal = createGeneralUserA();
+        insertOneVal.setDepartmentId(1);
+        insertOneVal.setRole("ROLE_GENERAL");
 
-        int actual = userMapper.insertOne(expected);
+        int actual = userMapper.insertOne(insertOneVal);
 
         assertThat(actual).isEqualTo(1);
 
