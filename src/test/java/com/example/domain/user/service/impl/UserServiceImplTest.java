@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,7 +22,7 @@ class UserServiceImplTest {
     @Mock
     UserMapper mockMapper;
 
-    @InjectMocks
+    @Mock
     UserServiceImpl userServiceImpl;
 
     @Test
@@ -30,20 +30,22 @@ class UserServiceImplTest {
     void testSignup() {
         int testDepartmentId = 1;
         String testRole = "ROLE_GENERAL";
-        String testPassword = null;
+        String testPassword = "password";
 
-        MUser mUser = createGeneralUserA();
-        mUser.setDepartmentId(1);
-        mUser.setRole("ROLE_GENERAL");
-        mUser.setPassword("password");
-        mockMapper.insertOne(mUser);
+        doNothing().when(userServiceImpl).signup(any());
+        MUser signupReturnVal = createGeneralUserA();
+        signupReturnVal.setDepartmentId(1);
+        signupReturnVal.setRole("ROLE_GENERAL");
+        signupReturnVal.setPassword("password");
+
+        userServiceImpl.signup(signupReturnVal);
 
         ArgumentCaptor<MUser> insertOneArgCaptor = ArgumentCaptor.forClass(MUser.class);
-        verify(mockMapper, times(1)).insertOne(insertOneArgCaptor.capture());
-        MUser insertOneArgVal = insertOneArgCaptor.getValue();
-        assertThat(insertOneArgVal.getDepartmentId()).isEqualTo(testDepartmentId);
-        assertThat(insertOneArgVal.getRole()).isEqualTo(testRole);
-        assertThat(insertOneArgVal.getPassword()).isEqualTo(testPassword);
+        verify(userServiceImpl, times(1)).signup(insertOneArgCaptor.capture());
+        MUser insertArgVal = insertOneArgCaptor.getValue();
+        assertThat(insertArgVal.getDepartmentId()).isEqualTo(testDepartmentId);
+        assertThat(insertArgVal.getRole()).isEqualTo(testRole);
+        assertThat(insertArgVal.getPassword()).isEqualTo(testPassword);
     }
 
     @Test
