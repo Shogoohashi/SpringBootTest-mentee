@@ -71,23 +71,27 @@ class UserServiceImplTest {
     @Test
     @DisplayName("リクエストが成功した場合、ユーザー1件を更新する。")
     void updateUserOne() {
-        MUser mUser = createGeneralUserA();
+        doNothing().when(mockUserServiceImpl).updateUserOne(any(),any(),any());
+        MUser updateUserOneReturnVal = createGeneralUserA();
+        updateUserOneReturnVal.setUserId("test@co.jp");
+        updateUserOneReturnVal.setUserName("テストユーザー");
+        updateUserOneReturnVal.setPassword("testPassword");
 
-        mockMapper.updateOne(mUser.getUserId()
-                , mUser.getPassword()
-                , mUser.getUserName());
+        mockUserServiceImpl.updateUserOne(updateUserOneReturnVal.getUserId()
+                ,updateUserOneReturnVal.getPassword()
+                ,updateUserOneReturnVal.getUserName());
 
         ArgumentCaptor<String> updateOneArgCaptor1 = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> updateOneArgCaptor2 = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> updateOneArgCaptor3 = ArgumentCaptor.forClass(String.class);
-        verify(mockMapper, times(1))
-                .updateOne(updateOneArgCaptor1.capture(), updateOneArgCaptor2.capture(), updateOneArgCaptor3.capture());
+        verify(mockUserServiceImpl, times(1))
+                .updateUserOne(updateOneArgCaptor1.capture(), updateOneArgCaptor2.capture(), updateOneArgCaptor3.capture());
         String updateOneArgVal1 = updateOneArgCaptor1.getValue();
         String updateOneArgVal2 = updateOneArgCaptor2.getValue();
         String updateOneArgVal3 = updateOneArgCaptor3.getValue();
-        assertThat(updateOneArgVal1).isEqualTo(mUser.getUserId());
-        assertThat(updateOneArgVal2).isEqualTo(mUser.getPassword());
-        assertThat(updateOneArgVal3).isEqualTo(mUser.getUserName());
+        assertThat(updateOneArgVal1).isEqualTo(updateUserOneReturnVal.getUserId());
+        assertThat(updateOneArgVal2).isEqualTo(updateUserOneReturnVal.getPassword());
+        assertThat(updateOneArgVal3).isEqualTo(updateUserOneReturnVal.getUserName());
     }
 
     @Test
