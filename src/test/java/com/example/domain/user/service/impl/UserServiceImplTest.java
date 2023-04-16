@@ -113,15 +113,14 @@ class UserServiceImplTest {
     void getLoginUser() {
         MUser findLoginUserReturnVal = createGeneralUserA();
         doReturn(findLoginUserReturnVal).when(mockMapper).findLoginUser(any());
-        MUser mUser = createGeneralUserA();
-        MUser actual = userServiceImpl.getLoginUser(mUser.getUserId());
+        MUser actual = userServiceImpl.getLoginUser(findLoginUserReturnVal.getUserId());
 
         assertThat(actual.getUserId()).isEqualTo(findLoginUserReturnVal.getUserId());
 
         ArgumentCaptor<String> findLoginUserArgumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockMapper, times(1)).findLoginUser(findLoginUserArgumentCaptor.capture());
         String findLoginUserArgVal = findLoginUserArgumentCaptor.getValue();
-        assertThat(findLoginUserArgVal).isEqualTo(mUser.getUserId());
+        assertThat(findLoginUserArgVal).isEqualTo(findLoginUserReturnVal.getUserId());
     }
 
 }
