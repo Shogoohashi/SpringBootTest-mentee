@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -22,8 +23,11 @@ class UserServiceImplTest {
     @Mock
     UserMapper mockMapper;
 
-    @Mock
+    @InjectMocks
     UserServiceImpl userServiceImpl;
+
+    @Mock
+    UserServiceImpl mockUserServiceImpl;
 
     @Test
     @DisplayName("リクエストが成功した場合、データ登録される。")
@@ -32,16 +36,16 @@ class UserServiceImplTest {
         String testRole = "ROLE_GENERAL";
         String testPassword = "password";
 
-        doNothing().when(userServiceImpl).signup(any());
+        doNothing().when(mockUserServiceImpl).signup(any());
         MUser signupReturnVal = createGeneralUserA();
         signupReturnVal.setDepartmentId(1);
         signupReturnVal.setRole("ROLE_GENERAL");
         signupReturnVal.setPassword("password");
 
-        userServiceImpl.signup(signupReturnVal);
+        mockUserServiceImpl.signup(signupReturnVal);
 
         ArgumentCaptor<MUser> insertOneArgCaptor = ArgumentCaptor.forClass(MUser.class);
-        verify(userServiceImpl, times(1)).signup(insertOneArgCaptor.capture());
+        verify(mockUserServiceImpl, times(1)).signup(insertOneArgCaptor.capture());
         MUser insertArgVal = insertOneArgCaptor.getValue();
         assertThat(insertArgVal.getDepartmentId()).isEqualTo(testDepartmentId);
         assertThat(insertArgVal.getRole()).isEqualTo(testRole);
@@ -50,19 +54,18 @@ class UserServiceImplTest {
 
     @Test
     @DisplayName("リクエストが成功した場合、ユーザーを取得する。")
-    void getUserOne() {
+    void testGetUserOne() {
         MUser getUserOneReturnVal = createGeneralUserA();
         doReturn(getUserOneReturnVal).when(mockMapper).findOne(any());
 
-        MUser mUser = createGeneralUserA();
-        MUser actual = userServiceImpl.getUserOne(mUser.getUserId());
+        MUser actual = userServiceImpl.getUserOne(getUserOneReturnVal.getUserId());
 
-        assertThat(actual.getUserId()).isEqualTo(mUser.getUserId());
+        assertThat(actual.getUserId()).isEqualTo(getUserOneReturnVal.getUserId());
 
         ArgumentCaptor<String> findOneArgCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockMapper, times(1)).findOne(findOneArgCaptor.capture());
         String findOneArgVal = findOneArgCaptor.getValue();
-        assertThat(findOneArgVal).isEqualTo(mUser.getUserId());
+        assertThat(findOneArgVal).isEqualTo(getUserOneReturnVal.getUserId());
     }
 
     @Test
