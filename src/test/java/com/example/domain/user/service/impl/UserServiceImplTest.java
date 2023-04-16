@@ -97,15 +97,15 @@ class UserServiceImplTest {
     @Test
     @DisplayName("リクエストが成功した場合、ユーザー1件を削除する。")
     void deleteUserOne() {
-        MUser mUser = createGeneralUserA();
+        doNothing().when(mockUserServiceImpl).deleteUserOne(any());
+        MUser updateUserOneReturnVal = createGeneralUserA();
 
-        int testCount = mockMapper.deleteOne(mUser.getUserId());
-        System.out.println(testCount);
+        mockUserServiceImpl.deleteUserOne(updateUserOneReturnVal.getUserId());
 
         ArgumentCaptor<String> deleteOneArgCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mockMapper, times(1)).deleteOne(deleteOneArgCaptor.capture());
+        verify(mockUserServiceImpl, times(1)).deleteUserOne(deleteOneArgCaptor.capture());
         String deleteOneArgVal = deleteOneArgCaptor.getValue();
-        assertThat(deleteOneArgVal).isEqualTo(mUser.getUserId());
+        assertThat(deleteOneArgVal).isEqualTo(updateUserOneReturnVal.getUserId());
     }
 
     @Test
