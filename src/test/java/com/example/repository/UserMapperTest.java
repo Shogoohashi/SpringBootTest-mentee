@@ -62,8 +62,10 @@ class UserMapperTest {
         signupForm.setUserId(null);
         MUser expected = modelMapper.map(signupForm, MUser.class);
 
+        userMapper.updateOne(expected.getUserId(), expected.getPassword(), expected.getUserName());
         List<MUser> actual = userMapper.findMany(expected);
 
+        assertThat(actual.get(0).getUserId()).isEqualTo(expected.getUserId());
         assertThat(actual.size()).isEqualTo(1);
     }
 
@@ -75,8 +77,10 @@ class UserMapperTest {
         signupForm.setUserName(null);
         MUser expected = modelMapper.map(signupForm, MUser.class);
 
+        userMapper.updateOne(expected.getUserId(), expected.getPassword(), expected.getUserName());
         List<MUser> actual = userMapper.findMany(expected);
 
+        assertThat(actual.get(0).getUserName()).isEqualTo(expected.getUserName());
         assertThat(actual.size()).isEqualTo(1);
     }
 
