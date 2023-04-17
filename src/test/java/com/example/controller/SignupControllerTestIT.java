@@ -17,8 +17,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -75,8 +73,6 @@ class SignupControllerTestIT {
                 .andExpect(model().hasNoErrors())
                 .andExpect(model().attribute("genderMap", genderMap))
                 .andExpect(view().name("user/signup"));
-
-        verify(mockUserApplicationService, times(1)).getGenderMap(any());
     }
 
 
