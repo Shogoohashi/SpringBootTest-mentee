@@ -47,7 +47,6 @@ class UserMapperTest {
         SignupForm signupForm = createSignupForm();
         signupForm.setUserId(null);
         signupForm.setUserName(null);
-        MUser expected = modelMapper.map(signupForm, MUser.class);
 
         List<MUser> actual = userMapper.findMany(expected);
 
@@ -60,7 +59,6 @@ class UserMapperTest {
     void testFindMany2() {
         SignupForm signupForm = createSignupForm();
         signupForm.setUserId(null);
-        MUser expected = modelMapper.map(signupForm, MUser.class);
 
         userMapper.updateOne(expected.getUserId(), expected.getPassword(), expected.getUserName());
         List<MUser> actual = userMapper.findMany(expected);
@@ -75,7 +73,6 @@ class UserMapperTest {
     void testFindMany3() {
         SignupForm signupForm = createSignupForm();
         signupForm.setUserName(null);
-        MUser expected = modelMapper.map(signupForm, MUser.class);
 
         userMapper.updateOne(expected.getUserId(), expected.getPassword(), expected.getUserName());
         List<MUser> actual = userMapper.findMany(expected);
@@ -132,7 +129,6 @@ class UserMapperTest {
         MUser signupForm = createGeneralUserA();
         signupForm.setDepartment(null);
         signupForm.setSalaryList(null);
-        MUser expected = modelMapper.map(signupForm, MUser.class);
 
         MUser actual = userMapper.findLoginUser(expected.getUserId());
 
