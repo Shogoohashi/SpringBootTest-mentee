@@ -167,7 +167,7 @@ class UserDetailControllerTest {
             @Test
             @WithMockUser
             @DisplayName("正常系：ユーザ削除処理をした場合、ユーザリスト画面へ遷移する")
-            void TestDeleteUser() throws Exception {
+            void testDeleteUser() throws Exception {
                 String testUserId = "test@co.jp";
                 doNothing().when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = new UserDetailForm();
@@ -190,7 +190,7 @@ class UserDetailControllerTest {
 
             @Test
             @DisplayName("異常系：ログインしていない場合、login画面へ遷移する")
-            void TestDeleteUser1() throws Exception {
+            void testDeleteUser1() throws Exception {
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
                                 .with(csrf()))
@@ -203,7 +203,7 @@ class UserDetailControllerTest {
             @Test
             @WithMockUser
             @DisplayName("異常系：DataAccessExceptionが発生した場合、error画面へ遷移する")
-            void TestDeleteUser2() throws Exception {
+            void testDeleteUser2() throws Exception {
                 String testUserId = "test@co.jp";
                 doThrow(new DataAccessException("userDetailForm") {
                 }).when(mockUserService).deleteUserOne(any());
