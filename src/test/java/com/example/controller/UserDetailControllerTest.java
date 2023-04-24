@@ -168,6 +168,8 @@ class UserDetailControllerTest {
             @WithMockUser
             @DisplayName("正常系：ユーザ削除処理をした場合、ユーザリスト画面へ遷移する")
             void testDeleteUser() throws Exception {
+                String expected = null;
+
                 String testUserId = "test@co.jp";
                 doNothing().when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = new UserDetailForm();
@@ -184,7 +186,7 @@ class UserDetailControllerTest {
                 verify(mockUserService, times(1))
                         .deleteUserOne(deleteArgCaptor.capture());
                 String deleteArgVal = deleteArgCaptor.getValue();
-                assertThat(deleteArgVal).isNull();
+                assertThat(deleteArgVal).isEqualTo(expected);
 
             }
 
