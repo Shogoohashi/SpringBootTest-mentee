@@ -123,21 +123,21 @@ class UserListControllerTest {
         @WithMockUser
         @DisplayName("正常系：ログイン状態でユーザ画面へ遷移した場合、ユーザ検索処理がされる。")
         void testPostUserList() throws Exception {
-            MUser test = new MUser();
-            test.setUserId(null);
-            test.setUserName(null);
+            MUser userTest = new MUser();
+            userTest.setUserId("test@co.jp");
+            userTest.setUserName("テストユーザ");
 
             MUser mUserA = createGeneralUserA();
             MUser mUserB = createGeneralUserB();
             List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
             doReturn(mUserList).when(mockUserService).getUsers(any());
             UserListForm userListForm = new UserListForm();
-            userListForm.setUserId(mUserA.getUserId());
-            userListForm.setUserName(mUserA.getUserName());
+            userListForm.setUserId("test@co.jp");
+            userListForm.setUserName("テストユーザ");
 
             mockMvc.perform(post("/user/list")
                             .with(csrf())
-                            .flashAttr("UserListForm", userListForm))
+                            .flashAttr("userListForm", userListForm))
                     .andExpect(status().isOk())
                     .andExpect(model().attribute("userList", mUserList))
                     .andExpect(view().name("user/list"));
@@ -145,8 +145,8 @@ class UserListControllerTest {
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).getUsers(userListArgumentCaptor.capture());
             MUser userListArgVal = userListArgumentCaptor.getValue();
-            assertEquals(userListArgVal.getUserId(), test.getUserId());
-            assertEquals(userListArgVal.getUserName(), test.getUserName());
+            assertThat(userListArgVal).isEqualTo(userTest);
+
         }
 
         @Test
@@ -165,14 +165,19 @@ class UserListControllerTest {
         @WithMockUser
         @DisplayName("異常系：DataAccessExceptionが発生した場合、error画面へ遷移する")
         void testPostUserList2() throws Exception {
+            MUser userTest = new MUser();
+            userTest.setUserId("test@co.jp");
+            userTest.setUserName("テストユーザ");
+
             doThrow(new DataAccessException("userList") {
             }).when(mockUserService).getUsers(any());
             UserListForm userListForm = new UserListForm();
-            userListForm.setUserId(null);
-            userListForm.setUserName(null);
+            userListForm.setUserId("test@co.jp");
+            userListForm.setUserName("テストユーザ");
 
             mockMvc.perform(post("/user/list")
-                            .with(csrf()))
+                            .with(csrf())
+                            .flashAttr("userListForm", userListForm))
                     .andExpect(status().isOk())
                     .andExpect(model().attribute("error", ""))
                     .andExpect(model().attribute("message", "DataAccessExceptionが発生しました"))
@@ -182,8 +187,7 @@ class UserListControllerTest {
             ArgumentCaptor<MUser> userListArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).getUsers(userListArgumentCaptor.capture());
             MUser userListArgVal = userListArgumentCaptor.getValue();
-            assertEquals(userListArgVal.getUserId(), userListForm.getUserId());
-            assertEquals(userListArgVal.getUserName(), userListForm.getUserName());
+            assertThat(userListArgVal).isEqualTo(userTest);
         }
     }
 
