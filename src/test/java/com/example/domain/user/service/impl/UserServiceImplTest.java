@@ -32,9 +32,10 @@ class UserServiceImplTest {
     @Test
     @DisplayName("リクエストが成功した場合、データ登録される。")
     void testSignup() {
-        int testDepartmentId = 1;
-        String testRole = "ROLE_GENERAL";
-        String testPassword = "password";
+        MUser testUser = createGeneralUserA();
+        testUser.setDepartmentId(1);
+        testUser.setRole("ROLE_GENERAL");
+        testUser.setPassword("password");
 
         doNothing().when(mockUserServiceImpl).signup(any());
         MUser signupReturnVal = createGeneralUserA();
@@ -47,14 +48,14 @@ class UserServiceImplTest {
         ArgumentCaptor<MUser> insertOneArgCaptor = ArgumentCaptor.forClass(MUser.class);
         verify(mockUserServiceImpl, times(1)).signup(insertOneArgCaptor.capture());
         MUser insertArgVal = insertOneArgCaptor.getValue();
-        assertThat(insertArgVal.getDepartmentId()).isEqualTo(testDepartmentId);
-        assertThat(insertArgVal.getRole()).isEqualTo(testRole);
-        assertThat(insertArgVal.getPassword()).isEqualTo(testPassword);
+        assertThat(insertArgVal).isEqualTo(testUser);
     }
 
     @Test
     @DisplayName("リクエストが成功した場合、ユーザーを取得する。")
     void testGetUserOne() {
+        String testUser = "user@co.jp";
+
         MUser getUserOneReturnVal = createGeneralUserA();
         doReturn(getUserOneReturnVal).when(mockMapper).findOne(any());
 
@@ -65,7 +66,7 @@ class UserServiceImplTest {
         ArgumentCaptor<String> findOneArgCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockMapper, times(1)).findOne(findOneArgCaptor.capture());
         String findOneArgVal = findOneArgCaptor.getValue();
-        assertThat(findOneArgVal).isEqualTo(getUserOneReturnVal.getUserId());
+        assertThat(findOneArgVal).isEqualTo(testUser);
     }
 
     @Test
@@ -111,6 +112,8 @@ class UserServiceImplTest {
     @Test
     @DisplayName("リクエストが成功した場合、ログインユーザー情報を取得する。")
     void getLoginUser() {
+        String testUser = "user@co.jp";
+
         MUser findLoginUserReturnVal = createGeneralUserA();
         doReturn(findLoginUserReturnVal).when(mockMapper).findLoginUser(any());
         MUser actual = userServiceImpl.getLoginUser(findLoginUserReturnVal.getUserId());
@@ -120,7 +123,7 @@ class UserServiceImplTest {
         ArgumentCaptor<String> findLoginUserArgumentCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockMapper, times(1)).findLoginUser(findLoginUserArgumentCaptor.capture());
         String findLoginUserArgVal = findLoginUserArgumentCaptor.getValue();
-        assertThat(findLoginUserArgVal).isEqualTo(findLoginUserReturnVal.getUserId());
+        assertThat(findLoginUserArgVal).isEqualTo(testUser);
     }
 
 }
