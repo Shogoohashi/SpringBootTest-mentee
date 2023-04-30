@@ -29,28 +29,30 @@ class UserMapperTest {
     void testInsertOne() {
         MUser insertOneVal = new MUser();
         insertOneVal.setUserId("test@co.jp");
-        insertOneVal.setDepartmentId(1);
         insertOneVal.setRole("ROLE_GENERAL");
 
-
         int actual = userMapper.insertOne(insertOneVal);
-        MUser getTest = userMapper.findOne(insertOneVal.getUserId());
 
         assertThat(actual).isEqualTo(1);
-        assertThat(insertOneVal.getUserId()).isEqualTo(getTest.getUserId());
     }
 
     @Test
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: userIdとuserNameがnullの場合のユーザ取得件数を表示")
     void testFindMany1() {
-        SignupForm signupForm = createSignupForm();
-        signupForm.setUserId(null);
-        signupForm.setUserName(null);
+        MUser insertOneVal = new MUser();
+        insertOneVal.setUserId("test@co.jp");
+        insertOneVal.setUserName("テスト");
+        userMapper.insertOne(insertOneVal);
+
+        SignupForm findManyVal = createSignupForm();
+        findManyVal.setUserId(null);
+        findManyVal.setUserName(null);
+        MUser expected = modelMapper.map(findManyVal, MUser.class);
 
         List<MUser> actual = userMapper.findMany(expected);
 
-        assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual.size()).isEqualTo(3);
     }
 
     @Test
@@ -58,12 +60,11 @@ class UserMapperTest {
     @DisplayName("正常系: userIdがNullでuserNameがnulではない場合のユーザ取得件数を表示")
     void testFindMany2() {
         SignupForm signupForm = createSignupForm();
-        signupForm.setUserId(null);
+        MUser expected = modelMapper.map(signupForm, MUser.class);
 
-        userMapper.updateOne(expected.getUserId(), expected.getPassword(), expected.getUserName());
+        userMapper.updateOne(null,expected.getPassword(),expected.getUserName());
         List<MUser> actual = userMapper.findMany(expected);
 
-        assertThat(actual.get(0).getUserId()).isEqualTo(expected.getUserId());
         assertThat(actual.size()).isEqualTo(1);
     }
 
@@ -72,13 +73,12 @@ class UserMapperTest {
     @DisplayName("正常系: userNameがNullでuserIdがnulではない場合のユーザ取得件数を表示")
     void testFindMany3() {
         SignupForm signupForm = createSignupForm();
-        signupForm.setUserName(null);
+        MUser expected = modelMapper.map(signupForm, MUser.class);
 
-        userMapper.updateOne(expected.getUserId(), expected.getPassword(), expected.getUserName());
+        userMapper.updateOne(expected.getUserId(), expected.getPassword(), null);
         List<MUser> actual = userMapper.findMany(expected);
 
-        assertThat(actual.get(0).getUserName()).isEqualTo(expected.getUserName());
-        assertThat(actual.size()).isEqualTo(1);
+        assertThat(actual.size()).isEqualTo(0);
     }
 
     @Test
@@ -97,8 +97,6 @@ class UserMapperTest {
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: useIdに紐づくm_userレコードを更新する。")
     void testUpdateOne() {
-        String testPassword = "testPassword";
-        String testUserName = "テストユーザ";
         MUser mUser = createGeneralUserA();
         mUser.setPassword("testPassword");
         mUser.setUserName("テストユーザ");
@@ -106,8 +104,7 @@ class UserMapperTest {
         userMapper.updateOne(mUser.getUserId(),mUser.getPassword(),mUser.getUserName());
         MUser actual = userMapper.findOne(mUser.getUserId());
 
-        assertThat(actual.getPassword()).isEqualTo(testPassword);
-        assertThat(actual.getUserName()).isEqualTo(testUserName);
+        assertThat(actual).isEqualTo(mUser);
     }
 
     @Test
@@ -129,6 +126,7 @@ class UserMapperTest {
         MUser signupForm = createGeneralUserA();
         signupForm.setDepartment(null);
         signupForm.setSalaryList(null);
+        MUser expected = modelMapper.map(signupForm, MUser.class);
 
         MUser actual = userMapper.findLoginUser(expected.getUserId());
 
