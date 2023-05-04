@@ -29,7 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-class UserListControllerTest {
+class UserListControllerTestIT {
 
     @MockBean
     UserService mockUserService;
