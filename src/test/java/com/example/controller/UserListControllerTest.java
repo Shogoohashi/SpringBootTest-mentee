@@ -44,10 +44,6 @@ class UserListControllerTest {
     @Sql("classpath:testData/data.sql")
     @WithMockUser
     void getUserList() throws Exception {
-        MUser test = new MUser();
-        test.setUserId(null);
-        test.setUserName(null);
-
         MUser mUser1 = createGeneralUserA();
         MUser mUser2 = createGeneralUserB();
         List<MUser> mUserList = Arrays.asList(mUser1, mUser2);
@@ -57,7 +53,8 @@ class UserListControllerTest {
         userListForm.setUserName(mUser1.getUserName());
 
         mockMvc.perform(get("/user/list")
-                        .flashAttr("UserListForm", userListForm))
+                        .with(csrf())
+                        .flashAttr("userListForm", userListForm))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("userList", mUserList))
                 .andExpect(view().name("user/list"));
@@ -68,10 +65,6 @@ class UserListControllerTest {
     @Sql("classpath:testData/data.sql")
     @WithMockUser
     void postUserList() throws Exception{
-        MUser test = new MUser();
-        test.setUserId(null);
-        test.setUserName(null);
-
         MUser mUserA = createGeneralUserA();
         MUser mUserB = createGeneralUserB();
         List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
@@ -82,7 +75,7 @@ class UserListControllerTest {
 
         mockMvc.perform(post("/user/list")
                         .with(csrf())
-                        .flashAttr("UserListForm", userListForm))
+                        .flashAttr("userListForm", userListForm))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("userList", mUserList))
                 .andExpect(view().name("user/list"));
