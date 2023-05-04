@@ -112,9 +112,27 @@ public class UserDetailControllerIT {
 
         @Test
         @WithMockUser
-        @DisplayName("異常系:")
+        @Sql("classpath:testData/data.sql")
+        @DisplayName("異常系:更新エラーを起こした場合、userNameとpassWordは更新されない")
         void testUpdateUser1() throws Exception {
-//分からん
+            MUser mUser = createGeneralUserA();
+
+            doNothing().when(mockUserService).updateUserOne(any(), any(), any());
+            UserDetailForm userDetailFormVal = createUserDetailForm();
+            userDetailFormVal.setPassword("testPassword");
+            userDetailFormVal.setUserName("aaaaaaaaaabbbbbbbbbccccccccccddddddddddeeeeeeeeef");
+
+            mockMvc.perform(post("/user/detail")
+                            .param("update", "")
+                            .with(csrf())
+                            .flashAttr("userDetailForm", userDetailFormVal))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("/user/list"));
+
+            MUser actual = userMapper.findOne(mUser.getUserId());
+
+            assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
+            assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
         }
 
     }
@@ -132,7 +150,7 @@ public class UserDetailControllerIT {
         mockMvc.perform(post("/user/detail")
                         .param("delete", "")
                         .with(csrf())
-                        .flashAttr("UserDetailForm", userDetailForm))
+                        .flashAttr("userDetailForm", userDetailForm))
                 .andExpect(status().isFound())
                 .andExpect(redirectedUrl("/user/list"));
 
