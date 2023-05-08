@@ -1,9 +1,8 @@
 package com.example.repository;
 
 import com.example.domain.user.model.MUser;
-import com.example.form.SignupForm;
+import static com.example.utils.SampleMUser.createAdminUser;
 import static com.example.utils.SampleMUser.createGeneralUserA;
-import static com.example.utils.SampleSignupForm.createSignupForm;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
@@ -32,65 +31,119 @@ class UserMapperTest {
         insertOneVal.setRole("ROLE_GENERAL");
 
         int actual = userMapper.insertOne(insertOneVal);
+        MUser actualUser = userMapper.findOne(insertOneVal.getUserId());
 
         assertThat(actual).isEqualTo(1);
+        assertThat(actualUser.getUserId()).isEqualTo(insertOneVal.getUserId());
+        assertThat(actualUser.getUserName()).isEqualTo(insertOneVal.getUserName());
+        assertThat(actualUser.getPassword()).isEqualTo(insertOneVal.getPassword());
+        assertThat(actualUser.getAge()).isEqualTo(insertOneVal.getAge());
+        assertThat(actualUser.getRole()).isEqualTo(insertOneVal.getRole());
+        assertThat(actualUser.getGender()).isEqualTo(insertOneVal.getGender());
+        assertThat(actualUser.getBirthday()).isEqualTo(insertOneVal.getBirthday());
     }
 
     @Test
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: userIdとuserNameがnullの場合のユーザ取得件数を表示")
     void testFindMany1() {
-        MUser insertOneVal = new MUser();
-        insertOneVal.setUserId("test@co.jp");
-        insertOneVal.setUserName("テスト");
-        userMapper.insertOne(insertOneVal);
+        MUser testUser1 = createAdminUser();
+        MUser testUser2 = createGeneralUserA();
 
-        SignupForm findManyVal = createSignupForm();
+        MUser findManyVal = new MUser();
         findManyVal.setUserId(null);
         findManyVal.setUserName(null);
-        MUser expected = modelMapper.map(findManyVal, MUser.class);
+        List<MUser> actual = userMapper.findMany(findManyVal);
 
-        List<MUser> actual = userMapper.findMany(expected);
-
-        assertThat(actual.size()).isEqualTo(3);
+        assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual.get(0).getUserId()).isEqualTo(testUser1.getUserId());
+        assertThat(actual.get(0).getUserName()).isEqualTo(testUser1.getUserName());
+        assertThat(actual.get(0).getPassword()).isEqualTo(testUser1.getPassword());
+        assertThat(actual.get(0).getAge()).isEqualTo(testUser1.getAge());
+        assertThat(actual.get(0).getBirthday()).isEqualTo(testUser1.getBirthday());
+        assertThat(actual.get(0).getRole()).isEqualTo(testUser1.getRole());
+        assertThat(actual.get(0).getGender()).isEqualTo(testUser1.getGender());
+        assertThat(actual.get(1).getUserId()).isEqualTo(testUser2.getUserId());
+        assertThat(actual.get(1).getUserName()).isEqualTo(testUser2.getUserName());
+        assertThat(actual.get(1).getPassword()).isEqualTo(testUser2.getPassword());
+        assertThat(actual.get(1).getAge()).isEqualTo(testUser2.getAge());
+        assertThat(actual.get(1).getBirthday()).isEqualTo(testUser2.getBirthday());
+        assertThat(actual.get(1).getRole()).isEqualTo(testUser2.getRole());
+        assertThat(actual.get(1).getGender()).isEqualTo(testUser2.getGender());
     }
 
     @Test
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: userIdがNullでuserNameがnulではない場合のユーザ取得件数を表示")
     void testFindMany2() {
-        SignupForm signupForm = createSignupForm();
-        MUser expected = modelMapper.map(signupForm, MUser.class);
+        MUser testUser1 = createAdminUser();
+        MUser testUser2 = createGeneralUserA();
 
-        userMapper.updateOne(null,expected.getPassword(),expected.getUserName());
-        List<MUser> actual = userMapper.findMany(expected);
+        MUser findManyVal = new MUser();
+        findManyVal.setUserId(null);
+        List<MUser> actual = userMapper.findMany(findManyVal);
 
-        assertThat(actual.size()).isEqualTo(1);
+        assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual.get(0).getUserId()).isEqualTo(testUser1.getUserId());
+        assertThat(actual.get(0).getUserName()).isEqualTo(testUser1.getUserName());
+        assertThat(actual.get(0).getPassword()).isEqualTo(testUser1.getPassword());
+        assertThat(actual.get(0).getAge()).isEqualTo(testUser1.getAge());
+        assertThat(actual.get(0).getBirthday()).isEqualTo(testUser1.getBirthday());
+        assertThat(actual.get(0).getRole()).isEqualTo(testUser1.getRole());
+        assertThat(actual.get(0).getGender()).isEqualTo(testUser1.getGender());
+        assertThat(actual.get(1).getUserId()).isEqualTo(testUser2.getUserId());
+        assertThat(actual.get(1).getUserName()).isEqualTo(testUser2.getUserName());
+        assertThat(actual.get(1).getPassword()).isEqualTo(testUser2.getPassword());
+        assertThat(actual.get(1).getAge()).isEqualTo(testUser2.getAge());
+        assertThat(actual.get(1).getBirthday()).isEqualTo(testUser2.getBirthday());
+        assertThat(actual.get(1).getRole()).isEqualTo(testUser2.getRole());
+        assertThat(actual.get(1).getGender()).isEqualTo(testUser2.getGender());
     }
 
     @Test
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: userNameがNullでuserIdがnulではない場合のユーザ取得件数を表示")
     void testFindMany3() {
-        SignupForm signupForm = createSignupForm();
-        MUser expected = modelMapper.map(signupForm, MUser.class);
+        MUser testUser1 = createAdminUser();
+        MUser testUser2 = createGeneralUserA();
 
-        userMapper.updateOne(expected.getUserId(), expected.getPassword(), null);
-        List<MUser> actual = userMapper.findMany(expected);
+        MUser findManyVal = new MUser();
+        findManyVal.setUserName(null);
+        List<MUser> actual = userMapper.findMany(findManyVal);
 
-        assertThat(actual.size()).isEqualTo(0);
+        assertThat(actual.size()).isEqualTo(2);
+        assertThat(actual.get(0).getUserId()).isEqualTo(testUser1.getUserId());
+        assertThat(actual.get(0).getUserName()).isEqualTo(testUser1.getUserName());
+        assertThat(actual.get(0).getPassword()).isEqualTo(testUser1.getPassword());
+        assertThat(actual.get(0).getAge()).isEqualTo(testUser1.getAge());
+        assertThat(actual.get(0).getBirthday()).isEqualTo(testUser1.getBirthday());
+        assertThat(actual.get(0).getRole()).isEqualTo(testUser1.getRole());
+        assertThat(actual.get(0).getGender()).isEqualTo(testUser1.getGender());
+        assertThat(actual.get(1).getUserId()).isEqualTo(testUser2.getUserId());
+        assertThat(actual.get(1).getUserName()).isEqualTo(testUser2.getUserName());
+        assertThat(actual.get(1).getPassword()).isEqualTo(testUser2.getPassword());
+        assertThat(actual.get(1).getAge()).isEqualTo(testUser2.getAge());
+        assertThat(actual.get(1).getBirthday()).isEqualTo(testUser2.getBirthday());
+        assertThat(actual.get(1).getRole()).isEqualTo(testUser2.getRole());
+        assertThat(actual.get(1).getGender()).isEqualTo(testUser2.getGender());
     }
 
     @Test
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: userIdに紐づくm_userレコードが取得できること")
     void testFindOne() {
-        MUser expected = createGeneralUserA();
-        expected.setRole(null);
+        MUser mUser = createGeneralUserA();
+        mUser.setRole(null);
 
-        MUser actual = userMapper.findOne(expected.getUserId());
+        MUser actual = userMapper.findOne(mUser.getUserId());
 
-        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+        assertThat(actual.getUserId()).isEqualTo(mUser.getUserId());
+        assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
+        assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
+        assertThat(actual.getAge()).isEqualTo(mUser.getAge());
+        assertThat(actual.getRole()).isEqualTo(mUser.getRole());
+        assertThat(actual.getGender()).isEqualTo(mUser.getGender());
+        assertThat(actual.getBirthday()).isEqualTo(mUser.getBirthday());
     }
 
     @Test
@@ -100,11 +153,14 @@ class UserMapperTest {
         MUser mUser = createGeneralUserA();
         mUser.setPassword("testPassword");
         mUser.setUserName("テストユーザ");
+        mUser.setPassword("testPassword");
 
         userMapper.updateOne(mUser.getUserId(),mUser.getPassword(),mUser.getUserName());
         MUser actual = userMapper.findOne(mUser.getUserId());
 
-        assertThat(actual).isEqualTo(mUser);
+        assertThat(actual.getUserId()).isEqualTo(mUser.getUserId());
+        assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
+        assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
     }
 
     @Test
@@ -123,13 +179,16 @@ class UserMapperTest {
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: useIdに紐づくloginユーザー情報を取得する。")
     void testFindLoginUser() {
-        MUser signupForm = createGeneralUserA();
-        signupForm.setDepartment(null);
-        signupForm.setSalaryList(null);
-        MUser expected = modelMapper.map(signupForm, MUser.class);
+        MUser mUser = createGeneralUserA();
 
-        MUser actual = userMapper.findLoginUser(expected.getUserId());
+        MUser actual = userMapper.findLoginUser(mUser.getUserId());
 
-        assertThat(actual).usingRecursiveComparison().isEqualTo(expected);
+        assertThat(actual.getUserId()).isEqualTo(mUser.getUserId());
+        assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
+        assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
+        assertThat(actual.getAge()).isEqualTo(mUser.getAge());
+        assertThat(actual.getRole()).isEqualTo(mUser.getRole());
+        assertThat(actual.getGender()).isEqualTo(mUser.getGender());
+        assertThat(actual.getBirthday()).isEqualTo(mUser.getBirthday());
     }
 }
