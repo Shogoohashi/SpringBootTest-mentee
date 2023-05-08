@@ -26,8 +26,6 @@ class UserServiceImplTest {
     @InjectMocks
     UserServiceImpl userServiceImpl;
 
-    @Mock
-    UserServiceImpl mockUserServiceImpl;
 
     @Test
     @DisplayName("リクエストが成功した場合、データ登録される。")
@@ -36,19 +34,20 @@ class UserServiceImplTest {
         testUser.setDepartmentId(1);
         testUser.setRole("ROLE_GENERAL");
         testUser.setPassword("password");
+        doReturn(1).when(mockMapper).insertOne(any());
 
-        doNothing().when(mockUserServiceImpl).signup(any());
-        MUser signupReturnVal = createGeneralUserA();
-        signupReturnVal.setDepartmentId(1);
-        signupReturnVal.setRole("ROLE_GENERAL");
-        signupReturnVal.setPassword("password");
-
-        mockUserServiceImpl.signup(signupReturnVal);
+        mockMapper.insertOne(testUser);
 
         ArgumentCaptor<MUser> insertOneArgCaptor = ArgumentCaptor.forClass(MUser.class);
-        verify(mockUserServiceImpl, times(1)).signup(insertOneArgCaptor.capture());
+        verify(mockMapper, times(1)).insertOne(insertOneArgCaptor.capture());
         MUser insertArgVal = insertOneArgCaptor.getValue();
-        assertThat(insertArgVal).isEqualTo(testUser);
+        assertThat(insertArgVal.getUserId()).isEqualTo(testUser.getUserId());
+        assertThat(insertArgVal.getUserName()).isEqualTo(testUser.getUserName());
+        assertThat(insertArgVal.getPassword()).isEqualTo(testUser.getPassword());
+        assertThat(insertArgVal.getAge()).isEqualTo(testUser.getAge());
+        assertThat(insertArgVal.getBirthday()).isEqualTo(testUser.getBirthday());
+        assertThat(insertArgVal.getGender()).isEqualTo(testUser.getGender());
+
     }
 
     @Test
@@ -60,8 +59,13 @@ class UserServiceImplTest {
         doReturn(getUserOneReturnVal).when(mockMapper).findOne(any());
 
         MUser actual = userServiceImpl.getUserOne(getUserOneReturnVal.getUserId());
-
         assertThat(actual.getUserId()).isEqualTo(getUserOneReturnVal.getUserId());
+        assertThat(actual.getUserName()).isEqualTo(getUserOneReturnVal.getUserName());
+        assertThat(actual.getPassword()).isEqualTo(getUserOneReturnVal.getPassword());
+        assertThat(actual.getAge()).isEqualTo(getUserOneReturnVal.getAge());
+        assertThat(actual.getRole()).isEqualTo(getUserOneReturnVal.getRole());
+        assertThat(actual.getBirthday()).isEqualTo(getUserOneReturnVal.getBirthday());
+        assertThat(actual.getGender()).isEqualTo(getUserOneReturnVal.getGender());
 
         ArgumentCaptor<String> findOneArgCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockMapper, times(1)).findOne(findOneArgCaptor.capture());
@@ -72,21 +76,21 @@ class UserServiceImplTest {
     @Test
     @DisplayName("リクエストが成功した場合、ユーザー1件を更新する。")
     void updateUserOne() {
-        doNothing().when(mockUserServiceImpl).updateUserOne(any(),any(),any());
+        doNothing().when(mockMapper).updateOne(any(),any(),any());
         MUser updateUserOneReturnVal = createGeneralUserA();
         updateUserOneReturnVal.setUserId("test@co.jp");
         updateUserOneReturnVal.setUserName("テストユーザー");
         updateUserOneReturnVal.setPassword("testPassword");
 
-        mockUserServiceImpl.updateUserOne(updateUserOneReturnVal.getUserId()
+        mockMapper.updateOne(updateUserOneReturnVal.getUserId()
                 ,updateUserOneReturnVal.getPassword()
                 ,updateUserOneReturnVal.getUserName());
 
         ArgumentCaptor<String> updateOneArgCaptor1 = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> updateOneArgCaptor2 = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> updateOneArgCaptor3 = ArgumentCaptor.forClass(String.class);
-        verify(mockUserServiceImpl, times(1))
-                .updateUserOne(updateOneArgCaptor1.capture(), updateOneArgCaptor2.capture(), updateOneArgCaptor3.capture());
+        verify(mockMapper, times(1))
+                .updateOne(updateOneArgCaptor1.capture(), updateOneArgCaptor2.capture(), updateOneArgCaptor3.capture());
         String updateOneArgVal1 = updateOneArgCaptor1.getValue();
         String updateOneArgVal2 = updateOneArgCaptor2.getValue();
         String updateOneArgVal3 = updateOneArgCaptor3.getValue();
@@ -98,13 +102,13 @@ class UserServiceImplTest {
     @Test
     @DisplayName("リクエストが成功した場合、ユーザー1件を削除する。")
     void deleteUserOne() {
-        doNothing().when(mockUserServiceImpl).deleteUserOne(any());
         MUser deleteUserOneReturnVal = createGeneralUserA();
+        doReturn(1).when(mockMapper).deleteOne(any());
 
-        mockUserServiceImpl.deleteUserOne(deleteUserOneReturnVal.getUserId());
+        mockMapper.deleteOne(deleteUserOneReturnVal.getUserId());
 
         ArgumentCaptor<String> deleteOneArgCaptor = ArgumentCaptor.forClass(String.class);
-        verify(mockUserServiceImpl, times(1)).deleteUserOne(deleteOneArgCaptor.capture());
+        verify(mockMapper, times(1)).deleteOne(deleteOneArgCaptor.capture());
         String deleteOneArgVal = deleteOneArgCaptor.getValue();
         assertThat(deleteOneArgVal).isEqualTo(deleteUserOneReturnVal.getUserId());
     }
