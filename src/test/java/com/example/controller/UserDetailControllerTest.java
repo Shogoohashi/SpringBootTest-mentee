@@ -168,17 +168,14 @@ class UserDetailControllerTest {
             @WithMockUser
             @DisplayName("正常系：ユーザ削除処理をした場合、ユーザリスト画面へ遷移する")
             void testDeleteUser() throws Exception {
-                String expected = null;
-
-                String testUserId = "test@co.jp";
                 doNothing().when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = new UserDetailForm();
-                userDetailForm.setUserId(testUserId);
+                userDetailForm.setUserId("test@co.jp");
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
                                 .with(csrf())
-                                .flashAttr("UserDetailForm", userDetailForm))
+                                .flashAttr("userDetailForm", userDetailForm))
                         .andExpect(status().isFound())
                         .andExpect(redirectedUrl("/user/list"));
 
@@ -186,7 +183,7 @@ class UserDetailControllerTest {
                 verify(mockUserService, times(1))
                         .deleteUserOne(deleteArgCaptor.capture());
                 String deleteArgVal = deleteArgCaptor.getValue();
-                assertThat(deleteArgVal).isEqualTo(expected);
+                assertThat(deleteArgVal).isEqualTo(userDetailForm.getUserId());
 
             }
 
@@ -206,11 +203,10 @@ class UserDetailControllerTest {
             @WithMockUser
             @DisplayName("異常系：DataAccessExceptionが発生した場合、error画面へ遷移する")
             void testDeleteUser2() throws Exception {
-                String testUserId = "test@co.jp";
                 doThrow(new DataAccessException("userDetailForm") {
                 }).when(mockUserService).deleteUserOne(any());
                 UserDetailForm userDetailForm = createUserDetailForm();
-                userDetailForm.setUserId(testUserId);
+                userDetailForm.setUserId("test@co.jp");
 
                 mockMvc.perform(post("/user/detail")
                                 .param("delete", "")
@@ -227,7 +223,7 @@ class UserDetailControllerTest {
                 verify(mockUserService, times(1))
                         .deleteUserOne(deleteArgCaptor.capture());
                 String deleteArgVal = deleteArgCaptor.getValue();
-                assertThat(deleteArgVal).isEqualTo(testUserId);
+                assertThat(deleteArgVal).isEqualTo(userDetailForm.getUserId());
 
             }
         }
