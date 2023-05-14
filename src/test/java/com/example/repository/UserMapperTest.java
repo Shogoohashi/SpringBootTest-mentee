@@ -81,6 +81,7 @@ class UserMapperTest {
 
         MUser findManyVal = new MUser();
         findManyVal.setUserId(null);
+        findManyVal.setUserName("テストユーザ");
         List<MUser> actual = userMapper.findMany(findManyVal);
 
         assertThat(actual.size()).isEqualTo(2);
@@ -108,6 +109,7 @@ class UserMapperTest {
         MUser testUser2 = createGeneralUserA();
 
         MUser findManyVal = new MUser();
+        findManyVal.setUserId("test@co.jp");
         findManyVal.setUserName(null);
         List<MUser> actual = userMapper.findMany(findManyVal);
 
@@ -161,6 +163,10 @@ class UserMapperTest {
         assertThat(actual.getUserId()).isEqualTo(mUser.getUserId());
         assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
         assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
+        assertThat(actual.getAge()).isEqualTo(mUser.getAge());
+        assertThat(actual.getRole()).isEqualTo(mUser.getRole());
+        assertThat(actual.getGender()).isEqualTo(mUser.getGender());
+        assertThat(actual.getBirthday()).isEqualTo(mUser.getBirthday());
     }
 
     @Test
