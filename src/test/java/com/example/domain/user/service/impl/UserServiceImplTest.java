@@ -36,7 +36,7 @@ class UserServiceImplTest {
         testUser.setPassword("password");
         doReturn(1).when(mockMapper).insertOne(any());
 
-        mockMapper.insertOne(testUser);
+        userServiceImpl.signup(testUser);
 
         ArgumentCaptor<MUser> insertOneArgCaptor = ArgumentCaptor.forClass(MUser.class);
         verify(mockMapper, times(1)).insertOne(insertOneArgCaptor.capture());
@@ -82,7 +82,7 @@ class UserServiceImplTest {
         updateUserOneReturnVal.setUserName("テストユーザー");
         updateUserOneReturnVal.setPassword("testPassword");
 
-        mockMapper.updateOne(updateUserOneReturnVal.getUserId()
+        userServiceImpl.updateUserOne(updateUserOneReturnVal.getUserId()
                 ,updateUserOneReturnVal.getPassword()
                 ,updateUserOneReturnVal.getUserName());
 
@@ -105,7 +105,7 @@ class UserServiceImplTest {
         MUser deleteUserOneReturnVal = createGeneralUserA();
         doReturn(1).when(mockMapper).deleteOne(any());
 
-        mockMapper.deleteOne(deleteUserOneReturnVal.getUserId());
+        userServiceImpl.deleteUserOne(deleteUserOneReturnVal.getUserId());
 
         ArgumentCaptor<String> deleteOneArgCaptor = ArgumentCaptor.forClass(String.class);
         verify(mockMapper, times(1)).deleteOne(deleteOneArgCaptor.capture());
