@@ -65,29 +65,25 @@ class UserRestControllerTest {
         @WithMockUser
         @DisplayName("正常系: レスポンスにユーザー一覧が存在すること")
         void case1() throws Exception {
-            MUser test = new MUser();
-            test.setUserId(null);
-            test.setUserName(null);
-
             MUser mUser1 = createGeneralUserA();
             MUser mUser2 = createGeneralUserB();
             List<MUser> getUsersReturnedVal = Arrays.asList(mUser1, mUser2);
             doReturn(getUsersReturnedVal).when(mockUserService).getUsers(any());
             UserListForm userListForm = new UserListForm();
             userListForm.setUserId(mUser1.getUserId());
-            userListForm.setUserName(mUser2.getUserName());
+            userListForm.setUserName(mUser1.getUserName());
 
             mockMvc.perform(get("/user/get/list")
                             .with(csrf())
-                            .flashAttr("UserListForm", userListForm))
+                            .flashAttr("userListForm", userListForm))
                     .andExpect(status().isOk())
                     .andExpect(content().json(objectMapper.writeValueAsString(getUsersReturnedVal)));
 
             ArgumentCaptor<MUser> getUserArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).getUsers(getUserArgumentCaptor.capture());
             MUser getUserArgVal = getUserArgumentCaptor.getValue();
-            assertThat(getUserArgVal.getUserId()).isEqualTo(test.getUserId());
-            assertThat(getUserArgVal.getUserName()).isEqualTo(test.getUserName());
+            assertThat(getUserArgVal.getUserId()).isEqualTo(mUser1.getUserId());
+            assertThat(getUserArgVal.getUserName()).isEqualTo(mUser1.getUserName());
         }
 
         @Test
@@ -158,14 +154,11 @@ class UserRestControllerTest {
         @WithMockUser
         @DisplayName("正常系:レスポンスが成功した場合、ユーザ情報が更新される。")
         void testUpdateUser() throws Exception {
-            String testUserId = "test@co.jp";
-            String testUserName = "テストユーザ";
-            String testPassword = "testPassword";
             doNothing().when(mockUserService).updateUserOne(any(), any(), any());
             UserDetailForm userDetailForm = new UserDetailForm();
-            userDetailForm.setUserId(testUserId);
-            userDetailForm.setPassword(testPassword);
-            userDetailForm.setUserName(testUserName);
+            userDetailForm.setUserId("test@co.jp");
+            userDetailForm.setPassword("testPassword");
+            userDetailForm.setUserName("テストユーザ");
             String json = objectMapper.writeValueAsString(userDetailForm);
 
             mockMvc.perform(put("/user/update")
@@ -183,9 +176,9 @@ class UserRestControllerTest {
             String updateUserOneArgVal1 = updateUserOneArgumentCaptor1.getValue();
             String updateUserOneArgVal2 = updateUserOneArgumentCaptor2.getValue();
             String updateUserOneArgVal3 = updateUserOneArgumentCaptor3.getValue();
-            assertThat(updateUserOneArgVal1).isEqualTo(testUserId);
-            assertThat(updateUserOneArgVal2).isEqualTo(testPassword);
-            assertThat(updateUserOneArgVal3).isEqualTo(testUserName);
+            assertThat(updateUserOneArgVal1).isEqualTo(userDetailForm.getUserId());
+            assertThat(updateUserOneArgVal2).isEqualTo(userDetailForm.getPassword());
+            assertThat(updateUserOneArgVal3).isEqualTo(userDetailForm.getUserName());
 
         }
 
