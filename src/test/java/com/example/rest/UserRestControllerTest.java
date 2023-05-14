@@ -190,7 +190,7 @@ class UserRestControllerTest {
             String json = objectMapper.writeValueAsString(userDetailForm);
 
             mockMvc.perform(put("/user/update")
-                            .flashAttr("signupForm", userDetailForm)
+                            .flashAttr("userDetailForm", userDetailForm)
                             .with(csrf())
                             .content(json)
                             .contentType(MediaType.APPLICATION_JSON))
@@ -232,7 +232,7 @@ class UserRestControllerTest {
                 String json = objectMapper.writeValueAsString(userDetailForm);
 
                 mockMvc.perform(delete("/user/delete")
-                                .flashAttr("signupForm", userDetailForm)
+                                .flashAttr("userDetailForm", userDetailForm)
                                 .with(csrf())
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON))
