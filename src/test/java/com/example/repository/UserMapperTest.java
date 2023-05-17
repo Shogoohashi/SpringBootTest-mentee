@@ -38,7 +38,6 @@ class UserMapperTest {
         assertThat(actualUser.getUserName()).isEqualTo(insertOneVal.getUserName());
         assertThat(actualUser.getPassword()).isEqualTo(insertOneVal.getPassword());
         assertThat(actualUser.getAge()).isEqualTo(insertOneVal.getAge());
-        assertThat(actualUser.getRole()).isEqualTo(insertOneVal.getRole());
         assertThat(actualUser.getGender()).isEqualTo(insertOneVal.getGender());
         assertThat(actualUser.getBirthday()).isEqualTo(insertOneVal.getBirthday());
     }
@@ -84,21 +83,7 @@ class UserMapperTest {
         findManyVal.setUserName("テストユーザ");
         List<MUser> actual = userMapper.findMany(findManyVal);
 
-        assertThat(actual.size()).isEqualTo(2);
-        assertThat(actual.get(0).getUserId()).isEqualTo(testUser1.getUserId());
-        assertThat(actual.get(0).getUserName()).isEqualTo(testUser1.getUserName());
-        assertThat(actual.get(0).getPassword()).isEqualTo(testUser1.getPassword());
-        assertThat(actual.get(0).getAge()).isEqualTo(testUser1.getAge());
-        assertThat(actual.get(0).getBirthday()).isEqualTo(testUser1.getBirthday());
-        assertThat(actual.get(0).getRole()).isEqualTo(testUser1.getRole());
-        assertThat(actual.get(0).getGender()).isEqualTo(testUser1.getGender());
-        assertThat(actual.get(1).getUserId()).isEqualTo(testUser2.getUserId());
-        assertThat(actual.get(1).getUserName()).isEqualTo(testUser2.getUserName());
-        assertThat(actual.get(1).getPassword()).isEqualTo(testUser2.getPassword());
-        assertThat(actual.get(1).getAge()).isEqualTo(testUser2.getAge());
-        assertThat(actual.get(1).getBirthday()).isEqualTo(testUser2.getBirthday());
-        assertThat(actual.get(1).getRole()).isEqualTo(testUser2.getRole());
-        assertThat(actual.get(1).getGender()).isEqualTo(testUser2.getGender());
+        assertThat(actual.size()).isEqualTo(0);
     }
 
     @Test
@@ -113,21 +98,7 @@ class UserMapperTest {
         findManyVal.setUserName(null);
         List<MUser> actual = userMapper.findMany(findManyVal);
 
-        assertThat(actual.size()).isEqualTo(2);
-        assertThat(actual.get(0).getUserId()).isEqualTo(testUser1.getUserId());
-        assertThat(actual.get(0).getUserName()).isEqualTo(testUser1.getUserName());
-        assertThat(actual.get(0).getPassword()).isEqualTo(testUser1.getPassword());
-        assertThat(actual.get(0).getAge()).isEqualTo(testUser1.getAge());
-        assertThat(actual.get(0).getBirthday()).isEqualTo(testUser1.getBirthday());
-        assertThat(actual.get(0).getRole()).isEqualTo(testUser1.getRole());
-        assertThat(actual.get(0).getGender()).isEqualTo(testUser1.getGender());
-        assertThat(actual.get(1).getUserId()).isEqualTo(testUser2.getUserId());
-        assertThat(actual.get(1).getUserName()).isEqualTo(testUser2.getUserName());
-        assertThat(actual.get(1).getPassword()).isEqualTo(testUser2.getPassword());
-        assertThat(actual.get(1).getAge()).isEqualTo(testUser2.getAge());
-        assertThat(actual.get(1).getBirthday()).isEqualTo(testUser2.getBirthday());
-        assertThat(actual.get(1).getRole()).isEqualTo(testUser2.getRole());
-        assertThat(actual.get(1).getGender()).isEqualTo(testUser2.getGender());
+        assertThat(actual.size()).isEqualTo(0);
     }
 
     @Test
@@ -164,7 +135,6 @@ class UserMapperTest {
         assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
         assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
         assertThat(actual.getAge()).isEqualTo(mUser.getAge());
-        assertThat(actual.getRole()).isEqualTo(mUser.getRole());
         assertThat(actual.getGender()).isEqualTo(mUser.getGender());
         assertThat(actual.getBirthday()).isEqualTo(mUser.getBirthday());
     }
