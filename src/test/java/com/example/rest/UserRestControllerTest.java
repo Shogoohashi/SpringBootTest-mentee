@@ -114,7 +114,8 @@ class UserRestControllerTest {
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
             ArgumentCaptor<MUser> signupArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).signup(signupArgumentCaptor.capture());
@@ -141,7 +142,8 @@ class UserRestControllerTest {
                             .flashAttr("signupForm", signupForm)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
             verify(mockUserService, times(0)).signup(any());
         }
@@ -166,7 +168,8 @@ class UserRestControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json)
                             .flashAttr("userDetailForm", userDetailForm))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
 
             ArgumentCaptor<String> updateUserOneArgumentCaptor1 = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<String> updateUserOneArgumentCaptor2 = ArgumentCaptor.forClass(String.class);
@@ -217,7 +220,9 @@ class UserRestControllerTest {
                                 .with(csrf())
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isOk());
+                        .andExpect(status().isOk())
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+
                 ArgumentCaptor<String> deleteUserOneArgumentCaptor = ArgumentCaptor.forClass(String.class);
                 verify(mockUserService, times(1)).deleteUserOne(deleteUserOneArgumentCaptor.capture());
                 String deleteUserOneArgVal = deleteUserOneArgumentCaptor.getValue();
