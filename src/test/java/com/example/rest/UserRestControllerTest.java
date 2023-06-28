@@ -37,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -115,7 +116,8 @@ class UserRestControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.length()").value(2));
 
             ArgumentCaptor<MUser> signupArgumentCaptor = ArgumentCaptor.forClass(MUser.class);
             verify(mockUserService, times(1)).signup(signupArgumentCaptor.capture());
@@ -143,7 +145,8 @@ class UserRestControllerTest {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.length()").value(2));
 
             verify(mockUserService, times(0)).signup(any());
         }
@@ -169,7 +172,8 @@ class UserRestControllerTest {
                             .content(json)
                             .flashAttr("userDetailForm", userDetailForm))
                     .andExpect(status().isOk())
-                    .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$").value(0));
 
             ArgumentCaptor<String> updateUserOneArgumentCaptor1 = ArgumentCaptor.forClass(String.class);
             ArgumentCaptor<String> updateUserOneArgumentCaptor2 = ArgumentCaptor.forClass(String.class);
@@ -221,7 +225,8 @@ class UserRestControllerTest {
                                 .content(json)
                                 .contentType(MediaType.APPLICATION_JSON))
                         .andExpect(status().isOk())
-                        .andExpect(content().contentType(MediaType.APPLICATION_JSON));
+                        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(jsonPath("$").value(0));
 
                 ArgumentCaptor<String> deleteUserOneArgumentCaptor = ArgumentCaptor.forClass(String.class);
                 verify(mockUserService, times(1)).deleteUserOne(deleteUserOneArgumentCaptor.capture());
