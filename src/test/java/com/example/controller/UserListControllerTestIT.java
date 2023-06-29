@@ -4,14 +4,10 @@ import com.example.domain.user.model.MUser;
 import com.example.domain.user.service.UserService;
 import com.example.form.UserListForm;
 import static com.example.utils.SampleMUser.createGeneralUserA;
-import static com.example.utils.SampleMUser.createGeneralUserB;
-import java.util.Arrays;
-import java.util.List;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -26,15 +22,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestEntityManager
 @Transactional
 class UserListControllerTestIT {
 
     @MockBean
-    UserService mockUserService;
+    UserService userService;
 
-    @Autowired
+    @MockBean
     ModelMapper modelMapper;
 
     @Autowired
@@ -45,9 +42,6 @@ class UserListControllerTestIT {
     @WithMockUser
     void getUserList() throws Exception {
         MUser mUser1 = createGeneralUserA();
-        MUser mUser2 = createGeneralUserB();
-        List<MUser> mUserList = Arrays.asList(mUser1, mUser2);
-        doReturn(mUserList).when(mockUserService).getUsers(any());
         UserListForm userListForm = new UserListForm();
         userListForm.setUserId(mUser1.getUserId());
         userListForm.setUserName(mUser1.getUserName());
@@ -56,7 +50,7 @@ class UserListControllerTestIT {
                         .with(csrf())
                         .flashAttr("userListForm", userListForm))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("userList", mUserList))
+                .andExpect(model().attribute("userListForm", userListForm))
                 .andExpect(view().name("user/list"));
 
     }
@@ -64,11 +58,8 @@ class UserListControllerTestIT {
     @Test
     @Sql("classpath:testData/data.sql")
     @WithMockUser
-    void postUserList() throws Exception{
+    void postUserList() throws Exception {
         MUser mUserA = createGeneralUserA();
-        MUser mUserB = createGeneralUserB();
-        List<MUser> mUserList = Arrays.asList(mUserA, mUserB);
-        doReturn(mUserList).when(mockUserService).getUsers(any());
         UserListForm userListForm = new UserListForm();
         userListForm.setUserId(mUserA.getUserId());
         userListForm.setUserName(mUserA.getUserName());
@@ -77,7 +68,7 @@ class UserListControllerTestIT {
                         .with(csrf())
                         .flashAttr("userListForm", userListForm))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("userList", mUserList))
+                .andExpect(model().attribute("userListForm", userListForm))
                 .andExpect(view().name("user/list"));
 
     }
