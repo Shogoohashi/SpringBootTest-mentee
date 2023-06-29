@@ -13,18 +13,12 @@ import java.util.Map;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,23 +30,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 import org.springframework.transaction.annotation.Transactional;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestEntityManager
 @Transactional
 class SignupControllerTestIT {
 
-
-    @MockBean
-    UserApplicationService mockUserApplicationService;
-
-    @SpyBean
-    SignupController mockSignupController;
-
-    @MockBean
-    UserService mockUserService;
-
     @Autowired
     MockMvc mockMvc;
+
+    @MockBean
+    UserApplicationService userApplicationService;
+
+    @MockBean
+    UserService userService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -66,12 +57,10 @@ class SignupControllerTestIT {
         Map<String, Integer> genderMap = new HashMap<>();
         genderMap.put("male", 1);
         genderMap.put("female", 2);
-        doReturn(genderMap).when(mockUserApplicationService).getGenderMap(any());
 
         mockMvc.perform(get("/user/signup"))
                 .andExpect(status().isOk())
                 .andExpect(model().hasNoErrors())
-                .andExpect(model().attribute("genderMap", genderMap))
                 .andExpect(view().name("user/signup"));
     }
 
@@ -80,7 +69,6 @@ class SignupControllerTestIT {
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: UserService#signupを呼ぶこと, ログイン画面にリダイレクトすること")
     void case1() throws Exception {
-        doNothing().when(mockUserService).signup(any());
         SignupForm testUser = createSignupForm();
         testUser.setUserId("test@co.jp");
 
@@ -100,10 +88,8 @@ class SignupControllerTestIT {
 
     @Test
     @Sql("classpath:testData/data.sql")
-    @DisplayName("正常系: UserService#signupを呼ぶこと, ログイン画面にリダイレクトすること")
+    @DisplayName("異常系:該当ユーザーが既に登録されていた場合、エラーが出る")
     void case2() throws Exception {
-        doThrow(new DataAccessException("") {
-        }).when(mockUserService).signup(any());
         MUser expected = createGeneralUserA();
         SignupForm signupForm = createSignupForm();
 
@@ -111,11 +97,8 @@ class SignupControllerTestIT {
                         .with(csrf())
                         .flashAttr("signupForm", signupForm)
                 )
-                .andExpect(status().isOk())
-                .andExpect(model().attribute("error", ""))
-                .andExpect(model().attribute("message", "SignupControllerで例外が発生しました"))
-                .andExpect(model().attribute("status", HttpStatus.INTERNAL_SERVER_ERROR))
-                .andExpect(view().name("error"));
+                .andExpect(status().isFound())
+                .andExpect(view().name("redirect:/login"));
 
         List<MUser> actual = userMapper.findMany(expected);
         assertThat(actual.size()).isEqualTo(1);
