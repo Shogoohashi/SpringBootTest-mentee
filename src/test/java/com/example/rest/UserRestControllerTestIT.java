@@ -16,11 +16,15 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -29,15 +33,20 @@ import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.transaction.annotation.Transactional;
 
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestEntityManager
 @Transactional
 class UserRestControllerTestIT {
     @MockBean
@@ -60,13 +69,11 @@ class UserRestControllerTestIT {
     @DisplayName("正常系: レスポンスにユーザー一覧が存在すること")
     void case1() throws Exception {
         List<MUser> getUsersReturnedVal = Arrays.asList(createGeneralUserA(), createGeneralUserB());
-        doReturn(getUsersReturnedVal).when(mockUserService).getUsers(any());
 
         mockMvc.perform(get("/user/get/list"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(getUsersReturnedVal)));
     }
-
 
     @Nested
     class PostSignup {
@@ -75,7 +82,6 @@ class UserRestControllerTestIT {
         @Sql("classpath:testData/data.sql")
         @DisplayName("正常系:レスポンスが成功した場合、ユーザ情報を登録する。")
         void testPostSignup() throws Exception {
-            doNothing().when(mockUserService).signup(any());
             SignupForm signupForm = new SignupForm();
             signupForm.setUserId("test@co.jp");
             signupForm.setUserName("テストユーザ");
@@ -90,7 +96,8 @@ class UserRestControllerTestIT {
                             .with(csrf())
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.length()").value(2));
 
             MUser actual = userMapper.findOne(mUser.getUserId());
 
@@ -104,7 +111,6 @@ class UserRestControllerTestIT {
         @Sql("classpath:testData/data.sql")
         @DisplayName("異常系:すでに該当ユーザが登録されていた場合、レコードに登録されていない。")
         void testPostSignup1() throws Exception {
-            doNothing().when(mockUserService).signup(any());
             SignupForm signupForm = createSignupForm();
             MUser mUser = modelMapper.map(signupForm, MUser.class);
 
@@ -128,7 +134,6 @@ class UserRestControllerTestIT {
         void testUpdateUser() throws Exception {
             String testUserName = "テストユーザ";
             String testPassword = "testPassword";
-            doNothing().when(mockUserService).updateUserOne(any(), any(), any());
             UserDetailForm userDetailForm = createUserDetailForm();
             userDetailForm.setPassword(testPassword);
             userDetailForm.setUserName(testUserName);
@@ -141,10 +146,11 @@ class UserRestControllerTestIT {
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(json)
                             .flashAttr("userDetailForm", userDetailForm))
-                    .andExpect(status().isOk());
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$").value(0));
 
             userMapper.updateOne(userDetailForm.getUserId()
-                    ,userDetailForm.getPassword(),userDetailForm.getUserName());
+                    , userDetailForm.getPassword(), userDetailForm.getUserName());
 
             MUser actual = userMapper.findOne(userDetailForm.getUserId());
 
@@ -161,7 +167,6 @@ class UserRestControllerTestIT {
 
             String testUserName = "aaaaaaaaaabbbbbbbbbbccccccccccddddddddddeeeeeeeeeeff";
             String testPassword = "testPassword";
-            doNothing().when(mockUserService).updateUserOne(any(), any(), any());
             UserDetailForm userDetailForm = createUserDetailForm();
             userDetailForm.setPassword(testPassword);
             userDetailForm.setUserName(testUserName);
@@ -181,5 +186,48 @@ class UserRestControllerTestIT {
             assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
             assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
         }
+
+        @Test
+        @DisplayName("異常系:ログインしていない場合、ログイン画面へ遷移する")
+        void testUpdateUser2() throws Exception {
+            UserDetailForm userDetailForm = createUserDetailForm();
+            String json = objectMapper.writeValueAsString(userDetailForm);
+
+            mockMvc.perform(put("/user/update")
+                            .flashAttr("userDetailForm", userDetailForm)
+                            .with(csrf())
+                            .content(json)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isFound())
+                    .andExpect(redirectedUrl("http://localhost/login"));
+
+        }
+    }
+
+    @Nested
+    class DeleteUser {
+
+        @Test
+        @WithMockUser
+        @DisplayName("異常系:ログインしていない場合、ログイン画面へ遷移する。")
+        void testDeleteUser() throws Exception {
+            UserDetailForm userDetailForm = createUserDetailForm();
+            String json = objectMapper.writeValueAsString(userDetailForm);
+
+            mockMvc.perform(delete("/user/delete")
+                            .flashAttr("userDetailForm", userDetailForm)
+                            .with(csrf())
+                            .content(json)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$").value(0));
+
+            MUser actual = userMapper.findLoginUser(userDetailForm.getUserId());
+
+            assertThat(actual).isEqualTo(null);
+        }
+
     }
 }
+
