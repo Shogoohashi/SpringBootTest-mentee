@@ -1,7 +1,6 @@
 package com.example.rest;
 
 import com.example.domain.user.model.MUser;
-import com.example.domain.user.service.UserService;
 import com.example.form.SignupForm;
 import com.example.form.UserDetailForm;
 import com.example.repository.UserMapper;
@@ -42,8 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestEntityManager
 @Transactional
 class UserRestControllerTestIT {
-    @Autowired
-    UserService mockUserService;
 
     @Autowired
     MockMvc mockMvc;
