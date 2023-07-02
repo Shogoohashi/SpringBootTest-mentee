@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import com.example.domain.user.model.MUser;
-import com.example.domain.user.service.UserService;
 import com.example.form.UserListForm;
 import static com.example.utils.SampleMUser.createGeneralUserA;
 import org.junit.jupiter.api.Test;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import org.springframework.test.context.jdbc.Sql;
@@ -27,10 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 @AutoConfigureTestEntityManager
 @Transactional
 class UserListControllerTestIT {
-
-    @Autowired
-    UserService userService;
-
     @Autowired
     ModelMapper modelMapper;
 
