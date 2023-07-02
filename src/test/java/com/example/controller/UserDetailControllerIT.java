@@ -69,9 +69,8 @@ public class UserDetailControllerIT {
         }
 
         @Test
-        @Sql("classpath:testData/data.sql")
         @WithMockUser
-        @DisplayName("正常系: ユーザー詳細画面に遷移すること")
+        @DisplayName("DataAccessExceptionが発生した場合、error画面へ遷移する")
         void testGetUser1() throws Exception {
 
             mockMvc.perform(get("/user/detail/{userId}", "user@co.jp"))
@@ -119,7 +118,7 @@ public class UserDetailControllerIT {
             MUser mUser = createGeneralUserA();
             UserDetailForm userDetailFormVal = createUserDetailForm();
             userDetailFormVal.setPassword("testPassword");
-            userDetailFormVal.setUserName("aaaaaaaaaabbbbbbbbbccccccccccddddddddddeeeeeeeeef");
+            userDetailFormVal.setUserName("aあああああああaaaaaaaaabbbbbbbbbccccccccccddddddddddeeeeeeeeef");
 
             mockMvc.perform(post("/user/detail")
                             .param("update", "")
