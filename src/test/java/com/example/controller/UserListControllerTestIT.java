@@ -28,10 +28,10 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class UserListControllerTestIT {
 
-    @MockBean
+    @Autowired
     UserService userService;
 
-    @MockBean
+    @Autowired
     ModelMapper modelMapper;
 
     @Autowired
