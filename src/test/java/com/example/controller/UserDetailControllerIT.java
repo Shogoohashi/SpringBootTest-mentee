@@ -1,7 +1,6 @@
 package com.example.controller;
 
 import com.example.domain.user.model.MUser;
-import com.example.domain.user.service.UserService;
 import com.example.form.UserDetailForm;
 import com.example.repository.UserMapper;
 import static com.example.utils.SampleMUser.createGeneralUserA;
@@ -38,9 +37,6 @@ public class UserDetailControllerIT {
 
     @Autowired
     MockMvc mockMvc;
-
-    @Autowired
-    UserService userService;
 
     @Autowired
     UserMapper userMapper;
