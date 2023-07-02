@@ -2,7 +2,6 @@ package com.example.controller;
 
 import com.example.application.service.UserApplicationService;
 import com.example.domain.user.model.MUser;
-import com.example.domain.user.service.UserService;
 import com.example.form.SignupForm;
 import com.example.repository.UserMapper;
 import static com.example.utils.SampleMUser.createGeneralUserA;
@@ -40,9 +39,6 @@ class SignupControllerTestIT {
 
     @Autowired
     UserApplicationService userApplicationService;
-
-    @Autowired
-    UserService userService;
 
     @Autowired
     ModelMapper modelMapper;
