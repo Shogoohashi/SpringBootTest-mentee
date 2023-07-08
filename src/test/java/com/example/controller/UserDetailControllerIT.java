@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.domain.user.model.MUser;
 import com.example.form.UserDetailForm;
 import com.example.repository.UserMapper;
+import static com.example.utils.SampleMUser.createAdminUser;
 import static com.example.utils.SampleMUser.createGeneralUserA;
 import static com.example.utils.SampleUserDetailForm.createUserDetailForm;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
@@ -11,7 +12,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestEntityManager
 @Transactional
 @Import(ModelMapper.class)
 public class UserDetailControllerIT {
@@ -41,9 +40,6 @@ public class UserDetailControllerIT {
     @Autowired
     UserMapper userMapper;
 
-    @Autowired
-    private ModelMapper modelMapper;
-
     @Nested
     class GetUser {
         @Test
@@ -51,11 +47,8 @@ public class UserDetailControllerIT {
         @WithMockUser
         @DisplayName("正常系: ユーザー詳細画面に遷移すること")
         void testGetUser() throws Exception {
-            MUser mUser = createGeneralUserA();
-            mUser.setPassword(null);
-            UserDetailForm userDetailForm;
-            userDetailForm = modelMapper.map(mUser, UserDetailForm.class);
-            userDetailForm.setSalaryList(mUser.getSalaryList());
+            UserDetailForm userDetailForm = createUserDetailForm();
+            userDetailForm.setPassword(null);
 
             mockMvc.perform(get("/user/detail/{userId}", "user@co.jp"))
                     .andExpect(status().isOk())
@@ -123,8 +116,7 @@ public class UserDetailControllerIT {
                     .andExpect(status().isFound())
                     .andExpect(redirectedUrl("/user/list"));
 
-            MUser actual = userMapper.findOne(mUser.getUserId());
-
+            MUser actual = userMapper.findOne(userDetailFormVal.getUserId());
             assertThat(actual.getUserName()).isEqualTo(mUser.getUserName());
             assertThat(actual.getPassword()).isEqualTo(mUser.getPassword());
         }
@@ -134,7 +126,7 @@ public class UserDetailControllerIT {
 
     @Test
     @WithMockUser
-    @DisplayName("正常系:ユーザ削除処理をした場合、ユーザリスト画面へ遷移する")
+    @DisplayName("正常系:ユーザ削除処理をした場合、該当データは存在しない。")
     void testDeleteUser() throws Exception {
         String testUserId = "test@co.jp";
         UserDetailForm userDetailForm = new UserDetailForm();
