@@ -3,10 +3,11 @@ package com.example.controller;
 import com.example.domain.user.model.MUser;
 import com.example.form.UserListForm;
 import static com.example.utils.SampleMUser.createGeneralUserA;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -22,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestEntityManager
 @Transactional
 class UserListControllerTestIT {
     @Autowired
@@ -36,6 +36,9 @@ class UserListControllerTestIT {
     @WithMockUser
     void getUserList() throws Exception {
         MUser mUser1 = createGeneralUserA();
+        mUser1.setSalaryList(null);
+        mUser1.setDepartment(null);
+        List<MUser> mUserList = Arrays.asList(mUser1);
         UserListForm userListForm = new UserListForm();
         userListForm.setUserId(mUser1.getUserId());
         userListForm.setUserName(mUser1.getUserName());
@@ -44,7 +47,7 @@ class UserListControllerTestIT {
                         .with(csrf())
                         .flashAttr("userListForm", userListForm))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("userListForm", userListForm))
+                .andExpect(model().attribute("userList", mUserList))
                 .andExpect(view().name("user/list"));
 
     }
@@ -53,16 +56,19 @@ class UserListControllerTestIT {
     @Sql("classpath:testData/data.sql")
     @WithMockUser
     void postUserList() throws Exception {
-        MUser mUserA = createGeneralUserA();
+        MUser mUser1 = createGeneralUserA();
+        mUser1.setSalaryList(null);
+        mUser1.setDepartment(null);
+        List<MUser> mUserList = Arrays.asList(mUser1);
         UserListForm userListForm = new UserListForm();
-        userListForm.setUserId(mUserA.getUserId());
-        userListForm.setUserName(mUserA.getUserName());
+        userListForm.setUserId(mUser1.getUserId());
+        userListForm.setUserName(mUser1.getUserName());
 
         mockMvc.perform(post("/user/list")
                         .with(csrf())
                         .flashAttr("userListForm", userListForm))
                 .andExpect(status().isOk())
-                .andExpect(model().attribute("userListForm", userListForm))
+                .andExpect(model().attribute("userList", mUserList))
                 .andExpect(view().name("user/list"));
 
     }
