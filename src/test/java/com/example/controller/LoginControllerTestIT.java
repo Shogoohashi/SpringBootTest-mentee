@@ -20,7 +20,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestEntityManager
 @Transactional
 class LoginControllerTestIT {
 
@@ -76,12 +75,12 @@ class LoginControllerTestIT {
     @DisplayName("異常系：パスワードが違う場合、ログインエラー")
     void case3() throws Exception {
         String userId = "user@co.jp";
-        String password = "password";
+        String password = "testWord";
 
         mockMvc.perform(formLogin()
                         .loginProcessingUrl("/login")
                         .user("userId", userId)
-                        .password("password", "testWord")
+                        .password("password", password)
                 )
                 .andExpect(unauthenticated())
                 .andExpect(status().isFound())
