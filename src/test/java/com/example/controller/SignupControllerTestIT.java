@@ -14,7 +14,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.AutoConfigureTestEntityManager;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -30,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@AutoConfigureTestEntityManager
 @Transactional
 class SignupControllerTestIT {
 
@@ -64,38 +62,37 @@ class SignupControllerTestIT {
     @Sql("classpath:testData/data.sql")
     @DisplayName("正常系: UserService#signupを呼ぶこと, ログイン画面にリダイレクトすること")
     void case1() throws Exception {
-        SignupForm testUser = createSignupForm();
-        testUser.setUserId("test@co.jp");
+        String userIdTest = "testUser@co.jp";
 
         SignupForm signupForm = createSignupForm();
-        signupForm.setUserId("test@co.jp");
+        signupForm.setUserId(userIdTest);
 
         mockMvc.perform(post("/user/signup")
                         .with(csrf())
                         .flashAttr("signupForm", signupForm)
                 )
                 .andExpect(status().isFound())
-                .andExpect(model().hasNoErrors())
                 .andExpect(redirectedUrl("/login"));
 
-        assertThat(signupForm).isEqualTo(testUser);
+        MUser actual = userMapper.findOne(signupForm.getUserId());
+        assertThat(actual.getUserId()).isEqualTo(signupForm.getUserId());
     }
 
     @Test
     @Sql("classpath:testData/data.sql")
     @DisplayName("異常系:該当ユーザーが既に登録されていた場合、エラーが出る")
     void case2() throws Exception {
-        MUser expected = createGeneralUserA();
         SignupForm signupForm = createSignupForm();
+        MUser mUser = createGeneralUserA();
 
         mockMvc.perform(post("/user/signup")
                         .with(csrf())
                         .flashAttr("signupForm", signupForm)
                 )
-                .andExpect(status().isFound())
-                .andExpect(view().name("redirect:/login"));
+                .andExpect(status().isOk())
+                .andExpect(view().name("error"));
 
-        List<MUser> actual = userMapper.findMany(expected);
+        List<MUser> actual = userMapper.findMany(mUser);
         assertThat(actual.size()).isEqualTo(1);
     }
 }
